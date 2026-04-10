@@ -5,13 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>產品計算器V3</title>
 
-<link rel="manifest" id="pwa-manifest">
+<!-- 核心：靜態Manifest檔案（安卓/Chrome主識別，iOS兜底） -->
+<link rel="manifest" href="./manifest.json" crossorigin="use-credentials">
+
+<!-- 全局主題色（雙端通用） -->
 <meta name="theme-color" content="#2c7be5">
+
+<!-- 安卓/Chrome PWA兼容配置 -->
 <meta name="mobile-web-app-capable" content="yes">
+
+<!-- iOS Safari PWA專屬強制配置（iOS只認靜態標籤，完全忽略JS動態設置） -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="產品計算器V3">
-<link rel="apple-touch-icon" id="pwa-apple-icon">
+<meta name="apple-mobile-web-app-title" content="計算器V3">
+<!-- iOS全機型圖標適配 -->
+<link rel="apple-touch-icon" sizes="180x180" href="./IMG_4289.png">
+<link rel="apple-touch-icon" sizes="167x167" href="./IMG_4289.png">
+<link rel="apple-touch-icon" sizes="152x152" href="./IMG_4289.png">
+<link rel="apple-touch-icon" sizes="120x120" href="./IMG_4289.png">
+
+<!-- 兜底圖標（瀏覽器標籤、舊設備兼容） -->
+<link rel="shortcut icon" href="./IMG_4289.png">
+<link rel="icon" type="image/png" sizes="32x32" href="./IMG_4289.png">
 
 <style>
 * { box-sizing: border-box; }
@@ -1028,43 +1043,33 @@ function pwaGenerateIcon(size) {
 let deferredInstallPrompt = null;
 
 function initPWA() {
-  var icon192 = pwaGenerateIcon(192);
-  var icon512 = pwaGenerateIcon(512);
-  var appleIconEl = document.getElementById('pwa-apple-icon');
-  if (appleIconEl) appleIconEl.href = icon192;
-  var manifestObj = {
-    name: '產品計算器V3', short_name: '計算器V3', description: 'Herbalife 產品計算器',
-    start_url: './', scope: './', display: 'standalone',
-    background_color: '#ffffff', theme_color: '#2c7be5', orientation: 'portrait',
-    icons: [
-      { src: icon192, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
-      { src: icon512, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
-    ]
-  };
-  try {
-    var manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
-    document.getElementById('pwa-manifest').href = URL.createObjectURL(manifestBlob);
-  } catch (e) {
-    try { document.getElementById('pwa-manifest').href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifestObj)); } catch (e2) {}
-  }
+  // Service Worker 註冊（雙端離線功能保留，不影響圖標）
   if ('serviceWorker' in navigator) {
-    var swCode = 'self.addEventListener("install",function(){self.skipWaiting();});self.addEventListener("activate",function(){self.clients.claim();});self.addEventListener("fetch",function(e){e.respondWith(caches.match(e.request).then(function(r){return r||fetch(e.request).catch(function(){return new Response("",{status:503});});}));});';
+    const swCode = 'self.addEventListener("install",function(){self.skipWaiting();});self.addEventListener("activate",function(){self.clients.claim();});self.addEventListener("fetch",function(e){e.respondWith(caches.match(e.request).then(function(r){return r||fetch(e.request).catch(function(){return new Response("",{status:503});});}));});';
     try {
       navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'application/javascript' })))
-        .then(function() { console.log('✅ PWA SW 已啟用'); })
-        .catch(function() { console.log('ℹ️ SW 跳過'); });
-    } catch (e) {}
+        .then(() => console.log('✅ PWA ServiceWorker 已啟用'))
+        .catch(() => console.log('ℹ️ ServiceWorker 跳過'));
+    } catch (e) { console.warn('ServiceWorker 註冊失敗', e); }
   }
-  window.addEventListener('beforeinstallprompt', function(e) {
-    e.preventDefault(); deferredInstallPrompt = e; showPwaInstallBtn();
+
+  // PWA安裝彈窗事件（安卓Chrome專用，iOS不影響）
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    showPwaInstallBtn();
   });
-  window.addEventListener('appinstalled', function() {
-    hidePwaInstallBtn(); showToast('✅ App 已成功安裝到主畫面！');
+
+  // 安裝成功回調（雙端通用）
+  window.addEventListener('appinstalled', () => {
+    hidePwaInstallBtn();
+    showToast('✅ App 已成功安裝到主畫面！');
   });
-  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+  // 已安裝狀態隱藏安裝按鈕
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   if (!isStandalone) setTimeout(showPwaInstallBtn, 600);
 }
-
 function showPwaInstallBtn() { var w = document.getElementById('pwa-install-wrap'); if (w) w.style.display = 'block'; }
 function hidePwaInstallBtn() { var w = document.getElementById('pwa-install-wrap'); if (w) w.style.display = 'none'; }
 
