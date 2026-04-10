@@ -1017,8 +1017,8 @@ function clearSelection() { selectedProducts = []; updateProductDisplay(); showT
 let deferredInstallPrompt = null;
 
 function initPWA() {
-  const icon192 = 'IMG_4289.png';
-  const icon512 = 'IMG_4289.png';
+  const icon192 = pwaGenerateIcon(192);
+  const icon512 = pwaGenerateIcon(512);
   var appleIconEl = document.getElementById('pwa-apple-icon');
   if (appleIconEl) appleIconEl.href = icon192;
   var manifestObj = {
