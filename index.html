@@ -373,13 +373,6 @@ td.product-name { min-width: 80px; max-width: 140px; word-break: keep-all; word-
 </head>
 <body>
 <div class="container">
-  <div style="text-align:center; padding:10px 0;">
-  <img src="IMG_4289.png" 
-       alt="Logo" 
-       style="width:150px; 
-              border-radius:20px; 
-              margin-bottom:8px;">
-</div>
 <h1>產品計算器</h1>
 
 <!-- ===== PWA 安裝按鈕 START ===== -->
@@ -1042,8 +1035,8 @@ function pwaGenerateIcon(size) {
 
 function initPWA() {
   // 生成圖示
-  const icon192 = pwaGenerateIcon(192);
-  const icon512 = pwaGenerateIcon(512);
+const icon192 = 'IMG_4289.png';
+const icon512 = 'IMG_4289.png';
 
   // 設定 Apple Touch Icon
   var appleIconEl = document.getElementById('pwa-apple-icon');
