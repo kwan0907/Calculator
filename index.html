@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>產品計算器</title>
 
-<!-- ===== PWA 新增 START ===== -->
 <link rel="manifest" id="pwa-manifest">
 <meta name="theme-color" content="#2c7be5">
 <meta name="mobile-web-app-capable" content="yes">
@@ -13,7 +12,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="計算器">
 <link rel="apple-touch-icon" id="pwa-apple-icon">
-<!-- ===== PWA 新增 END ===== -->
 
 <style>
 * { box-sizing: border-box; }
@@ -26,6 +24,33 @@ input, select { font-size: 16px !important; }
 .price-controls { display: flex; flex-direction: column; gap: 8px; }
 .price-control { width: 100%; }
 .price-control label { display: block; margin-bottom: 3px; font-weight: bold; font-size: 0.9rem; }
+
+/* ===== 字體大小控制列 ===== */
+.font-ctrl-bar {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 8px; margin-bottom: 8px; padding: 6px 10px;
+  background: #f8faff; border-radius: 8px; border: 1px solid #e0e8ff;
+}
+.font-ctrl-label {
+  color: #555; font-size: 0.85rem; white-space: nowrap;
+  margin-right: 2px; flex: 1;
+}
+.font-ctrl-btns { display: flex; align-items: center; gap: 6px; }
+.font-ctrl-btn {
+  padding: 5px 13px; margin: 0; border-radius: 6px;
+  font-weight: bold; font-size: 0.9rem; min-width: 42px;
+  background: #e6f0ff; border: 1px solid #b0c8f0; color: #2c7be5;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; cursor: pointer;
+}
+.font-ctrl-btn:hover  { background: #cce0ff; }
+.font-ctrl-btn:active { background: #a8c4f0; }
+.font-ctrl-btn:disabled { opacity: 0.32; cursor: default; background: #e6f0ff; }
+#font-size-display {
+  min-width: 38px; text-align: center; font-size: 0.85rem;
+  color: #2c7be5; font-weight: bold;
+  background: white; border: 1px solid #c8d8f5;
+  border-radius: 5px; padding: 3px 7px;
+}
 
 button {
   padding: 8px; border-radius: 4px; border: 1px solid #ddd;
@@ -70,75 +95,54 @@ select {
 
 /* ===== 搜尋 Modal ===== */
 .search-modal-overlay {
-  display: none;
-  position: fixed;
+  display: none; position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.55);
-  z-index: 800;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 0;
+  background: rgba(0,0,0,0.55); z-index: 800;
+  align-items: flex-end; justify-content: center; padding: 0;
 }
 .search-modal-content {
-  width: 100%; max-width: 600px;
-  background: white;
+  width: 100%; max-width: 600px; background: white;
   border-radius: 18px 18px 0 0;
   box-shadow: 0 -8px 32px rgba(0,0,0,0.22);
-  overflow: hidden;
-  display: flex; flex-direction: column;
-  height: 86vh;
+  overflow: hidden; display: flex; flex-direction: column; height: 86vh;
   animation: slideUpFromBottom 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @keyframes slideUpFromBottom {
   from { transform: translateY(100%); opacity: 0.7; }
   to   { transform: translateY(0);    opacity: 1; }
 }
-
 .search-modal-handle {
-  width: 40px; height: 4px;
-  background: #d1d5db;
-  border-radius: 2px;
-  margin: 10px auto 4px;
-  flex-shrink: 0;
+  width: 40px; height: 4px; background: #d1d5db;
+  border-radius: 2px; margin: 10px auto 4px; flex-shrink: 0;
 }
-
 .search-modal-bar {
   display: flex; gap: 8px;
   padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px));
   background: linear-gradient(135deg, #e8f0ff, #ddeeff);
-  flex-shrink: 0; align-items: center;
-  border-top: 1px solid #c8d8f5;
+  flex-shrink: 0; align-items: center; border-top: 1px solid #c8d8f5;
 }
-.search-modal-input-wrap {
-  position: relative; flex: 1;
-}
+.search-modal-input-wrap { position: relative; flex: 1; }
 .search-modal-input-wrap input {
   width: 100%; padding: 11px 38px 11px 12px;
   border: 2px solid #2c7be5; border-radius: 10px;
   font-size: 16px !important; outline: none; background: white;
   transition: box-shadow 0.2s;
 }
-.search-modal-input-wrap input:focus {
-  box-shadow: 0 0 0 3px rgba(44,123,229,0.22);
-}
+.search-modal-input-wrap input:focus { box-shadow: 0 0 0 3px rgba(44,123,229,0.22); }
 #search-clear-btn {
   position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
   background: rgba(0,0,0,0.18); border: none; color: #333;
   width: 20px; height: 20px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 11px; font-weight: bold; cursor: pointer;
-  padding: 0; margin: 0;
-  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+  padding: 0; margin: 0; opacity: 0; pointer-events: none; transition: opacity 0.15s;
 }
 #search-clear-btn.visible { opacity: 1; pointer-events: auto; }
 #search-clear-btn:hover { background: rgba(0,0,0,0.3); }
 .btn-search-close {
-  padding: 9px 14px; background: #e5e7eb;
-  border: none; border-radius: 8px;
-  font-size: 0.88rem; cursor: pointer;
-  white-space: nowrap; flex-shrink: 0; color: #374151;
-  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
-  margin: 0;
+  padding: 9px 14px; background: #e5e7eb; border: none; border-radius: 8px;
+  font-size: 0.88rem; cursor: pointer; white-space: nowrap; flex-shrink: 0; color: #374151;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; margin: 0;
 }
 .btn-search-close:hover  { background: #d1d5db; }
 .btn-search-close:active { background: #9ca3af; }
@@ -147,30 +151,20 @@ select {
   display: flex; flex-wrap: nowrap; overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   padding: 8px 10px 7px; gap: 5px;
-  border-top: 1px solid #eee;
-  flex-shrink: 0; background: white;
+  border-top: 1px solid #eee; flex-shrink: 0; background: white;
   scrollbar-width: none;
 }
 .search-modal-cats::-webkit-scrollbar { display: none; }
 
 .product-list-modal {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  flex: 1; min-height: 0; display: flex; flex-direction: column;
 }
-.product-list-modal::before {
-  content: '';
-  flex: 1 1 0;
-}
+.product-list-modal::before { content: ''; flex: 1 1 0; }
 
 .product-item {
-  padding: 10px 14px; cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
-  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
-  transition: background 0.1s;
+  padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f0f0f0;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: background 0.1s;
 }
 .product-item:hover  { background-color: #f5f5f5; }
 .product-item:active { background-color: #e8e8e8; }
@@ -201,8 +195,7 @@ select {
 .package-plans-title { font-size: 0.85rem; font-weight: bold; color: #6d28d9; margin-bottom: 6px; }
 .package-plans-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
 .package-plan-btn {
-  padding: 7px 8px;
-  background-color: #7c3aed; color: white; border: none;
+  padding: 7px 8px; background-color: #7c3aed; color: white; border: none;
   border-radius: 8px; cursor: pointer;
   text-align: left; display: flex; flex-direction: column; gap: 2px;
   margin: 0; transition: background-color 0.15s;
@@ -217,11 +210,9 @@ select {
 .plan-profit{ font-size: 0.68rem; color: #bbf7d0; font-weight: bold; white-space: nowrap; }
 
 .category-tab {
-  padding: 5px 10px; cursor: pointer;
-  border: 1px solid transparent; border-radius: 15px;
+  padding: 5px 10px; cursor: pointer; border: 1px solid transparent; border-radius: 15px;
   white-space: nowrap; transition: background-color 0.15s;
-  font-size: 0.82rem; -webkit-tap-highlight-color: transparent;
-  flex-shrink: 0;
+  font-size: 0.82rem; -webkit-tap-highlight-color: transparent; flex-shrink: 0;
 }
 .category-tab.active { background-color: #e6f0ff; border-color: #2c7be5; color: #2c7be5; font-weight: bold; }
 
@@ -242,7 +233,6 @@ tr.package-row td.pkg-profit-cell { color: #16a34a !important; font-weight: 700 
 td.no-profit { color: #bbb; text-align: center; }
 
 .table-container { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 10px; padding-bottom: 4px; }
-.sticky-note { position: absolute; left: 0; bottom: 0; font-size: 11px; color: #777; background-color: rgba(255,255,255,0.8); padding: 2px 4px; border-radius: 2px; display: none; }
 table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
 th, td { border: 1px solid #ddd; padding: 8px 4px; text-align: left; }
 th { background-color: #f8f9fa; position: sticky; top: 0; z-index: 10; font-size: 0.8rem; }
@@ -263,8 +253,7 @@ td.product-name { min-width: 80px; max-width: 140px; word-break: keep-all; word-
 .qty-btn:active { background-color: #d0d0d0; }
 .qty-input {
   width: 28px; height: 22px; padding: 0 1px; margin: 0 2px;
-  text-align: center; border: 1px solid #ddd; border-radius: 3px;
-  flex-shrink: 0;
+  text-align: center; border: 1px solid #ddd; border-radius: 3px; flex-shrink: 0;
 }
 
 .summary { background-color: #f8f9fa; padding: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -303,18 +292,13 @@ td.product-name { min-width: 80px; max-width: 140px; word-break: keep-all; word-
 .empty-table-message { text-align: center; padding: 20px; color: #666; font-style: italic; }
 
 /* ===== PWA 安裝按鈕 ===== */
-.pwa-install-wrap {
-  text-align: center;
-  margin-bottom: 10px;
-}
+.pwa-install-wrap { text-align: center; margin-bottom: 10px; }
 .pwa-install-btn {
   background: linear-gradient(135deg, #16a34a, #15803d);
-  color: white; border: none;
-  padding: 10px 24px; border-radius: 20px;
+  color: white; border: none; padding: 10px 24px; border-radius: 20px;
   font-size: 0.88rem; cursor: pointer;
   display: inline-flex; align-items: center; gap: 6px;
-  box-shadow: 0 2px 8px rgba(22,163,74,0.35);
-  margin: 0;
+  box-shadow: 0 2px 8px rgba(22,163,74,0.35); margin: 0;
   animation: pulse-green 2s infinite;
 }
 .pwa-install-btn:hover  { background: linear-gradient(135deg, #15803d, #166534); }
@@ -325,7 +309,7 @@ td.product-name { min-width: 80px; max-width: 140px; word-break: keep-all; word-
 }
 
 @media screen and (max-width: 480px) {
-  body { font-size: 11px; padding: 4px; }
+  body { padding: 4px; }
   .container { padding: 8px; }
   h1 { font-size: 1.1rem; margin-bottom: 8px; }
   button { font-size: 0.8rem; padding: 6px; }
@@ -348,7 +332,7 @@ td.product-name { min-width: 80px; max-width: 140px; word-break: keep-all; word-
 }
 @media (min-width: 768px) {
   .container { max-width: 1200px; padding: 20px; }
-  body { padding: 20px; font-size: 16px; }
+  body { padding: 20px; }
   h1 { font-size: 2rem; }
   .controls { flex-direction: row; }
   .price-controls { flex-direction: row; }
@@ -375,13 +359,20 @@ td.product-name { min-width: 80px; max-width: 140px; word-break: keep-all; word-
 <div class="container">
 <h1>產品計算器</h1>
 
-<!-- ===== PWA 安裝按鈕 START ===== -->
+<!-- PWA 安裝按鈕 -->
 <div id="pwa-install-wrap" class="pwa-install-wrap" style="display:none;">
-  <button class="pwa-install-btn" onclick="handlePwaInstall()">
-    📲 安裝到主畫面
-  </button>
+  <button class="pwa-install-btn" onclick="handlePwaInstall()">📲 安裝到主畫面</button>
 </div>
-<!-- ===== PWA 安裝按鈕 END ===== -->
+
+<!-- ===== 字體大小控制列 ===== -->
+<div class="font-ctrl-bar">
+  <span class="font-ctrl-label">🔠 字體大小</span>
+  <div class="font-ctrl-btns">
+    <button class="font-ctrl-btn" id="font-decrease-btn" onclick="changeFontSize(-1)">A－</button>
+    <span id="font-size-display">標準</span>
+    <button class="font-ctrl-btn" id="font-increase-btn" onclick="changeFontSize(1)">A＋</button>
+  </div>
+</div>
 
 <div class="controls">
   <div class="tier-select">
@@ -491,7 +482,7 @@ td.product-name { min-width: 80px; max-width: 140px; word-break: keep-all; word-
   </div>
 </div>
 
-<!-- ===== PWA 安裝說明 Modal START ===== -->
+<!-- PWA 安裝說明 Modal -->
 <div class="modal-overlay" id="pwa-info-modal">
   <div class="modal">
     <div class="modal-title">📲 安裝到主畫面</div>
@@ -501,7 +492,6 @@ td.product-name { min-width: 80px; max-width: 140px; word-break: keep-all; word-
     </div>
   </div>
 </div>
-<!-- ===== PWA 安裝說明 Modal END ===== -->
 
 <div class="toast" id="toast-message"></div>
 
@@ -567,7 +557,7 @@ const productsData = [
   { stock_no: "0771", prod_name: "深層滋潤眼霜", prod_name_en: "Hydrating Eye Cream", category: "外", type: "", vp: 26.35, retail_price: 482, 標準價: 489, 銅級: 421.95, 銀級: 377.25, 金級: 332.55, "58%": 301.26, "50%": 265.5, cost: 265.5, fav: 550, prod_seq: 620 },
   { stock_no: "0774", prod_name: "修護晚霜", prod_name_en: "Replenishing Night Cream", category: "外", type: "", vp: 28.4, retail_price: 519, 標準價: 527, 銅級: 454.7, 銀級: 406.5, 金級: 358.3, "58%": 324.56, "50%": 286, cost: 286, fav: 560, prod_seq: 650 },
   { stock_no: "0899", prod_name: "防曬日霜 SPF30/PA+++", prod_name_en: "PROTECTIVE Moisturizer SPF30", category: "外", type: "", vp: 28.4, retail_price: 519, 標準價: 527, 銅級: 454.7, 銀級: 406.5, 金級: 358.3, "58%": 324.56, "50%": 286, cost: 286, fav: 570, prod_seq: 660 },
-  { stock_no: "111K", prod_name: "維他命面膜-保濕", prod_name_en: "Vitamin Mask – Moisturizing", category: "外", type: "", vp: 8.4, retail_price: 168, 標準價: 171, 銅級: 149.1, 銀級: 134.5, 金級: 119.9, "58%": 109.68, "50%": 98, cost: 98, fav: 580, prod_seq: 670 },
+  { stock_no: "111K", prod_name: "維他命面膜-保濕", prod_name_en: "Vitamin Mask - Moisturizing", category: "外", type: "", vp: 8.4, retail_price: 168, 標準價: 171, 銅級: 149.1, 銀級: 134.5, 金級: 119.9, "58%": 109.68, "50%": 98, cost: 98, fav: 580, prod_seq: 670 },
   { stock_no: "2561", prod_name: "蘆薈滋潤沐浴露 250ml", prod_name_en: "Herbal Aloe Hand & Body Wash", category: "外", type: "", vp: 8.3, retail_price: 143, 標準價: 145, 銅級: 125.05, 銀級: 111.75, 金級: 98.45, "58%": 89.14, "50%": 78.5, cost: 78.5, fav: 590, prod_seq: 730 },
   { stock_no: "2562", prod_name: "蘆薈潤膚啫喱 200ml", prod_name_en: "Herbal Aloe Soothing Gel", category: "外", type: "", vp: 8.3, retail_price: 143, 標準價: 145, 銅級: 125.05, 銀級: 111.75, 金級: 98.45, "58%": 89.14, "50%": 78.5, cost: 78.5, fav: 600, prod_seq: 740 },
   { stock_no: "2563", prod_name: "蘆薈滋潤乳霜 200ml", prod_name_en: "Herbal Aloe Hand & Body Cream", category: "外", type: "", vp: 8.3, retail_price: 143, 標準價: 145, 銅級: 125.05, 銀級: 111.75, 金級: 98.45, "58%": 89.14, "50%": 78.5, cost: 78.5, fav: 610, prod_seq: 750 },
@@ -587,6 +577,46 @@ let currentCategory = "all";
 let currentView = "table";
 let newlyAddedStockNos = new Set();
 
+// ============================================================
+// ===== 字體大小控制 START =====
+// ============================================================
+const FONT_SIZES  = [11, 13, 16, 20];
+const FONT_LABELS = ['小', '標準', '大', '特大'];
+let currentFontLevel = 1; // 默認「標準」= index 1 = 13px
+
+function initFontSize() {
+  try {
+    const saved = localStorage.getItem('calcFontLevel');
+    if (saved !== null) {
+      const v = parseInt(saved);
+      if (!isNaN(v) && v >= 0 && v < FONT_SIZES.length) currentFontLevel = v;
+    }
+  } catch(e) {}
+  applyFontSize();
+}
+
+function changeFontSize(delta) {
+  const next = currentFontLevel + delta;
+  if (next < 0 || next >= FONT_SIZES.length) return;
+  currentFontLevel = next;
+  try { localStorage.setItem('calcFontLevel', currentFontLevel); } catch(e) {}
+  applyFontSize();
+  showToast('字體大小：' + FONT_LABELS[currentFontLevel]);
+}
+
+function applyFontSize() {
+  document.body.style.fontSize = FONT_SIZES[currentFontLevel] + 'px';
+  const disp = document.getElementById('font-size-display');
+  if (disp) disp.textContent = FONT_LABELS[currentFontLevel];
+  const decBtn = document.getElementById('font-decrease-btn');
+  const incBtn = document.getElementById('font-increase-btn');
+  if (decBtn) decBtn.disabled = (currentFontLevel === 0);
+  if (incBtn) incBtn.disabled = (currentFontLevel === FONT_SIZES.length - 1);
+}
+// ============================================================
+// ===== 字體大小控制 END =====
+// ============================================================
+
 let longPressTimer = null;
 let longPressInterval = null;
 function startIncrease(stockNo) { endLongPress(); increaseQuantity(stockNo); longPressTimer = setTimeout(() => { longPressInterval = setInterval(() => increaseQuantity(stockNo), 90); }, 480); }
@@ -596,25 +626,19 @@ function endLongPress() {
   if (longPressInterval) { clearInterval(longPressInterval); longPressInterval = null; }
 }
 
-function scrollListToTop() {
-  document.getElementById('product-list').scrollTop = 0;
-}
+function scrollListToTop() { document.getElementById('product-list').scrollTop = 0; }
 
 function openSearchModal() {
   const overlay = document.getElementById('search-modal-overlay');
   overlay.style.display = 'flex';
   const content = overlay.querySelector('.search-modal-content');
-  content.style.animation = 'none';
-  content.offsetHeight;
-  content.style.animation = '';
-  filterProducts();
-  scrollListToTop();
+  content.style.animation = 'none'; content.offsetHeight; content.style.animation = '';
+  filterProducts(); scrollListToTop();
   setTimeout(() => { document.getElementById('product-search').focus(); }, 80);
 }
 function closeSearchModal() {
   document.getElementById('search-modal-overlay').style.display = 'none';
-  document.getElementById('product-search').value = '';
-  updateClearBtn();
+  document.getElementById('product-search').value = ''; updateClearBtn();
 }
 function handleOverlayClick(e) {
   if (e.target === document.getElementById('search-modal-overlay')) closeSearchModal();
@@ -623,13 +647,9 @@ function updateClearBtn() {
   const val = document.getElementById('product-search').value;
   document.getElementById('search-clear-btn').classList.toggle('visible', !!val);
 }
-
 function clearSearch() {
-  document.getElementById('product-search').value = '';
-  updateClearBtn();
-  filterProducts();
-  scrollListToTop();
-  document.getElementById('product-search').focus();
+  document.getElementById('product-search').value = ''; updateClearBtn();
+  filterProducts(); scrollListToTop(); document.getElementById('product-search').focus();
 }
 
 function formatPrice(price, isPackage) { return isPackage ? '$' + Math.round(price) : '$' + price.toFixed(2); }
@@ -725,10 +745,7 @@ function initCategories() {
     tab.textContent = category === 'all' ? '全部' : category;
     tab.onclick = () => {
       document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      currentCategory = category;
-      filterProducts();
-      scrollListToTop();
+      tab.classList.add('active'); currentCategory = category; filterProducts(); scrollListToTop();
     };
     tabsContainer.appendChild(tab);
   });
@@ -775,8 +792,7 @@ function addProduct(product) {
   const existing = selectedProducts.find(p => p.stock_no === product.stock_no);
   if (existing) { existing.quantity += 1; showToast(`${product.prod_name} ×${existing.quantity}`); }
   else { selectedProducts.push({ ...product, quantity: 1 }); newlyAddedStockNos.add(product.stock_no); showToast(`已添加：${product.prod_name}`); }
-  updateProductDisplay();
-  filterProducts();
+  updateProductDisplay(); filterProducts();
   setTimeout(() => newlyAddedStockNos.clear(), 400);
 }
 function addPackagePlan(stockNo) {
@@ -863,8 +879,7 @@ function updateProductTable() {
     }
     html += `<td>${product.vp.toFixed(2)}</td><td>${tvp.toFixed(2)}</td>
       <td><button class="btn-danger" onclick="removeProductWithAnimation('${product.stock_no}')">移除</button></td>`;
-    row.innerHTML = html;
-    tbody.appendChild(row);
+    row.innerHTML = html; tbody.appendChild(row);
   });
 }
 
@@ -923,8 +938,7 @@ function updateProductCards() {
         </div>
         <div class="card-actions"><button class="btn-danger" onclick="removeProductWithAnimation('${product.stock_no}')">移除</button></div>
       </div>`;
-    card.innerHTML = html;
-    cc.appendChild(card);
+    card.innerHTML = html; cc.appendChild(card);
   });
 }
 
@@ -996,148 +1010,62 @@ function showToast(message, duration = 2500) {
   setTimeout(() => t.classList.remove('show'), duration);
 }
 function clearSelection() { selectedProducts = []; updateProductDisplay(); showToast('已清空所有選擇的產品'); }
-function detectMobile() { return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent); }
 
 // ============================================================
-// ===== PWA 新增 START =====
+// ===== PWA START =====
 // ============================================================
 let deferredInstallPrompt = null;
 
-function pwaGenerateIcon(size) {
-  const c = document.createElement('canvas');
-  c.width = c.height = size;
-  const ctx = c.getContext('2d');
-  // 圓角背景
-  const r = size * 0.2;
-  ctx.fillStyle = '#2c7be5';
-  ctx.beginPath();
-  ctx.moveTo(r, 0);
-  ctx.lineTo(size - r, 0);
-  ctx.quadraticCurveTo(size, 0, size, r);
-  ctx.lineTo(size, size - r);
-  ctx.quadraticCurveTo(size, size, size - r, size);
-  ctx.lineTo(r, size);
-  ctx.quadraticCurveTo(0, size, 0, size - r);
-  ctx.lineTo(0, r);
-  ctx.quadraticCurveTo(0, 0, r, 0);
-  ctx.closePath();
-  ctx.fill();
-  // 文字
-  ctx.fillStyle = 'white';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font = 'bold ' + Math.round(size * 0.34) + 'px Arial, sans-serif';
-  ctx.fillText('計算', size / 2, size * 0.40);
-  ctx.font = Math.round(size * 0.13) + 'px Arial, sans-serif';
-  ctx.fillText('產品計算器', size / 2, size * 0.72);
-  return c.toDataURL('image/png');
-}
-
 function initPWA() {
-  // 生成圖示
-const icon192 = 'IMG_4289.png';
-const icon512 = 'IMG_4289.png';
-
-  // 設定 Apple Touch Icon
+  const icon192 = 'IMG_4289.png';
+  const icon512 = 'IMG_4289.png';
   var appleIconEl = document.getElementById('pwa-apple-icon');
   if (appleIconEl) appleIconEl.href = icon192;
-
-  // 建立 Manifest
   var manifestObj = {
-    name: '產品計算器',
-    short_name: '計算器',
-    description: 'Herbalife 產品計算器',
-    start_url: './',
-    scope: './',
-    display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#2c7be5',
-    orientation: 'portrait',
+    name: '產品計算器', short_name: '計算器', description: 'Herbalife 產品計算器',
+    start_url: './', scope: './', display: 'standalone',
+    background_color: '#ffffff', theme_color: '#2c7be5', orientation: 'portrait',
     icons: [
       { src: icon192, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
       { src: icon512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
     ]
   };
-
   try {
-    var manifestJSON = JSON.stringify(manifestObj);
-    var manifestBlob = new Blob([manifestJSON], { type: 'application/manifest+json' });
-    var manifestUrl = URL.createObjectURL(manifestBlob);
-    document.getElementById('pwa-manifest').href = manifestUrl;
+    var manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+    document.getElementById('pwa-manifest').href = URL.createObjectURL(manifestBlob);
   } catch (e) {
-    try {
-      var enc = encodeURIComponent(JSON.stringify(manifestObj));
-      document.getElementById('pwa-manifest').href = 'data:application/manifest+json,' + enc;
-    } catch (e2) {}
+    try { document.getElementById('pwa-manifest').href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifestObj)); } catch (e2) {}
   }
-
-  // 嘗試註冊 Service Worker（提升安裝成功率）
   if ('serviceWorker' in navigator) {
-    var swCode = [
-      'var CACHE="pwa-calc-v1";',
-      'self.addEventListener("install",function(){self.skipWaiting();});',
-      'self.addEventListener("activate",function(){self.clients.claim();});',
-      'self.addEventListener("fetch",function(e){',
-      '  e.respondWith(caches.match(e.request).then(function(r){',
-      '    return r||fetch(e.request).catch(function(){return new Response("",{status:503});});',
-      '  }));',
-      '});'
-    ].join('');
+    var swCode = 'self.addEventListener("install",function(){self.skipWaiting();});self.addEventListener("activate",function(){self.clients.claim();});self.addEventListener("fetch",function(e){e.respondWith(caches.match(e.request).then(function(r){return r||fetch(e.request).catch(function(){return new Response("",{status:503});});}));});';
     try {
-      var swBlob = new Blob([swCode], { type: 'application/javascript' });
-      var swUrl = URL.createObjectURL(swBlob);
-      navigator.serviceWorker.register(swUrl)
+      navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'application/javascript' })))
         .then(function() { console.log('✅ PWA SW 已啟用'); })
-        .catch(function() { console.log('ℹ️ SW 跳過（單檔模式正常，不影響使用）'); });
+        .catch(function() { console.log('ℹ️ SW 跳過'); });
     } catch (e) {}
   }
-
-  // 監聽 Android Chrome 安裝提示
   window.addEventListener('beforeinstallprompt', function(e) {
-    e.preventDefault();
-    deferredInstallPrompt = e;
-    showPwaInstallBtn();
+    e.preventDefault(); deferredInstallPrompt = e; showPwaInstallBtn();
   });
-
   window.addEventListener('appinstalled', function() {
-    hidePwaInstallBtn();
-    showToast('✅ App 已成功安裝到主畫面！');
+    hidePwaInstallBtn(); showToast('✅ App 已成功安裝到主畫面！');
   });
-
-  // 若未安裝則顯示安裝按鈕
-  var isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                     window.navigator.standalone === true;
-  if (!isStandalone) {
-    setTimeout(showPwaInstallBtn, 600);
-  }
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (!isStandalone) setTimeout(showPwaInstallBtn, 600);
 }
 
-function showPwaInstallBtn() {
-  var wrap = document.getElementById('pwa-install-wrap');
-  if (wrap) wrap.style.display = 'block';
-}
-
-function hidePwaInstallBtn() {
-  var wrap = document.getElementById('pwa-install-wrap');
-  if (wrap) wrap.style.display = 'none';
-}
+function showPwaInstallBtn() { var w = document.getElementById('pwa-install-wrap'); if (w) w.style.display = 'block'; }
+function hidePwaInstallBtn() { var w = document.getElementById('pwa-install-wrap'); if (w) w.style.display = 'none'; }
 
 function handlePwaInstall() {
-  // Android Chrome 原生安裝提示
   if (deferredInstallPrompt) {
     deferredInstallPrompt.prompt();
-    deferredInstallPrompt.userChoice.then(function(result) {
-      deferredInstallPrompt = null;
-      if (result.outcome === 'accepted') hidePwaInstallBtn();
-    });
+    deferredInstallPrompt.userChoice.then(function(r) { deferredInstallPrompt = null; if (r.outcome === 'accepted') hidePwaInstallBtn(); });
     return;
   }
-
-  // 顯示手動安裝說明
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   var isAndroid = /Android/.test(navigator.userAgent);
   var msg;
-
   if (isIOS) {
     msg = 'iPhone / iPad 安裝步驟：\n\n① 確認使用 Safari 瀏覽器打開\n\n② 點底部的「分享」按鈕\n   （方框加箭頭的圖示 □↑）\n\n③ 向下滑動，找到\n   「加入主畫面」\n\n④ 點右上角「新增」即完成 ✅';
   } else if (isAndroid) {
@@ -1145,18 +1073,18 @@ function handlePwaInstall() {
   } else {
     msg = '安裝步驟：\n\n在瀏覽器網址列右側\n或「⋮」選單中\n找到「安裝應用程式」\n點擊後即可安裝到桌面 ✅';
   }
-
   document.getElementById('pwa-info-content').textContent = msg;
   document.getElementById('pwa-info-modal').style.display = 'flex';
 }
 // ============================================================
-// ===== PWA 新增 END =====
+// ===== PWA END =====
 // ============================================================
 
 window.onload = function () {
-  initPWA(); // ← PWA 新增
+  initPWA();
+  initFontSize();   // ← 字體大小初始化（讀取上次設定）
   initCategories();
-  if (detectMobile()) switchView('card'); else switchView('table');
+  switchView('table'); // ← 永遠默認表格視圖，用戶仍可手動切換
   updateProductDisplay();
   document.addEventListener('touchend', function (e) {
     const btn = e.target.closest('button');
