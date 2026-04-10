@@ -1,0 +1,38 @@
+{
+  "name": "產品計算器V3",
+  "short_name": "計算器V3",
+  "description": "Herbalife 產品計算器",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2c7be5",
+  "orientation": "portrait",
+  "lang": "zh-HK",
+  "icons": [
+    {
+      "src": "IMG_4289.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "IMG_4289.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "IMG_4289.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "IMG_4289.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ]
+}
