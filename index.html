@@ -678,50 +678,137 @@ function formatProfit(profit) {
 
 function copyToClipboard() {
   if (selectedProducts.length === 0) { showToast('沒有可複製的產品'); return; }
+
+  // 判斷當前是否有產生利潤（有選擇第二等級，或產品包含固定利潤的套裝）
+  const t1 = document.getElementById('pricing-tier1').value;
+  const t2 = document.getElementById('pricing-tier2').value;
+  const cmp = t2 && t1 !== t2;
+  const hasPkgProfit = selectedProducts.some(p => p.type === 'package' && p.fixedProfit !== undefined);
+  const hasProfit = cmp || hasPkgProfit;
+
+  // 動態生成選項 Modal (預設全部都要，保持現有資訊不變)
+  let modalHtml = `
+    <div class="modal-overlay" id="copy-modal" style="display:flex; z-index: 2000;">
+      <div class="modal">
+        <div class="modal-title">📋 選擇複製資訊</div>
+        <div class="modal-content" style="text-align: left; font-size: 1rem;">
+          <label style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer;">
+            <input type="checkbox" id="copy-opt-price" checked style="transform: scale(1.3); margin-right: 10px;"> 單價及總價
+          </label>
+          <label style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer;">
+            <input type="checkbox" id="copy-opt-vp" checked style="transform: scale(1.3); margin-right: 10px;"> VP 及 總VP
+          </label>
+  `;
+
+  // 只有當產生利潤時，才顯示「利潤」的勾選項
+  if (hasProfit) {
+      modalHtml += `
+          <label style="display: flex; align-items: center; margin-bottom: 12px; cursor: pointer;">
+            <input type="checkbox" id="copy-opt-profit" checked style="transform: scale(1.3); margin-right: 10px;"> 利潤
+          </label>
+      `;
+  }
+
+  modalHtml += `
+        </div>
+        <div class="modal-actions">
+          <button onclick="document.getElementById('copy-modal').remove()" style="padding: 8px 16px;">取消</button>
+          <button class="btn-primary" onclick="executeCopy()" style="padding: 8px 16px;">確定複製</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 清除舊的 Modal 並加入新的 Modal 到畫面中
+  const oldModal = document.getElementById('copy-modal');
+  if (oldModal) oldModal.remove();
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function executeCopy() {
+  // 獲取使用者的選擇狀態
+  const includePrice = document.getElementById('copy-opt-price') ? document.getElementById('copy-opt-price').checked : false;
+  const includeVP = document.getElementById('copy-opt-vp') ? document.getElementById('copy-opt-vp').checked : false;
+  const includeProfit = document.getElementById('copy-opt-profit') ? document.getElementById('copy-opt-profit').checked : false;
+
+  // 關閉 Modal
+  const copyModal = document.getElementById('copy-modal');
+  if (copyModal) copyModal.remove();
+
   const t1 = document.getElementById('pricing-tier1').value;
   const t2 = document.getElementById('pricing-tier2').value;
   const cmp = t2 && t1 !== t2;
   const now = new Date();
   const dateStr = now.toLocaleDateString('zh-HK') + ' ' + now.toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' });
   let lines = ['📋 產品計算', '日期：' + dateStr, '等級：' + t1 + (cmp ? ' / ' + t2 : ''), '================================', ''];
+
   selectedProducts.forEach((p, i) => {
     const isPkg = p.type === 'package';
     const price1 = p[t1], totalPrice1 = price1 * p.quantity, totalVP = p.vp * p.quantity;
     lines.push((i+1) + '. ' + p.prod_name + (isPkg ? '【套裝】' : '') + ' ×' + p.quantity);
+    
     if (cmp) {
       const price2 = p[t2], totalPrice2 = price2 * p.quantity;
       let up, tp;
       if (isPkg && p.fixedProfit !== undefined) { up = p.fixedProfit; tp = up * p.quantity; }
       else { up = Math.abs(price2 - price1); tp = up * p.quantity; }
-      lines.push('   ' + t1 + ' 單價：' + formatPrice(price1, isPkg) + '  總價：' + formatPrice(totalPrice1, isPkg));
-      lines.push('   ' + t2 + ' 單價：' + formatPrice(price2, isPkg) + '  總價：' + formatPrice(totalPrice2, isPkg));
-      lines.push('   💰 利潤：' + formatProfit(up) + ' / 件　合計：' + formatProfit(tp));
+
+      if (includePrice) {
+        lines.push('   ' + t1 + ' 單價：' + formatPrice(price1, isPkg) + '  總價：' + formatPrice(totalPrice1, isPkg));
+        lines.push('   ' + t2 + ' 單價：' + formatPrice(price2, isPkg) + '  總價：' + formatPrice(totalPrice2, isPkg));
+      }
+      if (includeProfit) {
+        lines.push('   💰 利潤：' + formatProfit(up) + ' / 件　合計：' + formatProfit(tp));
+      }
     } else {
-      lines.push('   單價：' + formatPrice(price1, isPkg) + '  總價：' + formatPrice(totalPrice1, isPkg));
-      if (isPkg && p.fixedProfit !== undefined) lines.push('   💰 固定利潤：' + formatProfit(p.fixedProfit) + ' / 件　合計：' + formatProfit(p.fixedProfit * p.quantity));
+      if (includePrice) {
+        lines.push('   單價：' + formatPrice(price1, isPkg) + '  總價：' + formatPrice(totalPrice1, isPkg));
+      }
+      if (includeProfit && isPkg && p.fixedProfit !== undefined) {
+         lines.push('   💰 固定利潤：' + formatProfit(p.fixedProfit) + ' / 件　合計：' + formatProfit(p.fixedProfit * p.quantity));
+      }
     }
-    lines.push('   VP：' + p.vp.toFixed(2) + '  總VP：' + totalVP.toFixed(2), '');
+    
+    if (includeVP) {
+      lines.push('   VP：' + p.vp.toFixed(2) + '  總VP：' + totalVP.toFixed(2));
+    }
+    lines.push('');
   });
+
   const totalQty = selectedProducts.reduce((s, p) => s + p.quantity, 0);
   const totalP1  = selectedProducts.reduce((s, p) => s + p[t1] * p.quantity, 0);
   const totalVP  = selectedProducts.reduce((s, p) => s + p.vp * p.quantity, 0);
   const pkgProds = selectedProducts.filter(p => p.type === 'package' && p.fixedProfit !== undefined);
   const totalPkgPr = pkgProds.reduce((s, p) => s + p.fixedProfit * p.quantity, 0);
-  lines.push('================================', '📊 總計', '總數量：' + totalQty + ' 件', '總金額（' + t1 + '）：$' + totalP1.toFixed(2));
-  if (cmp) {
-    const totalP2 = selectedProducts.reduce((s, p) => s + p[t2] * p.quantity, 0);
+
+  lines.push('================================', '📊 總計', '總數量：' + totalQty + ' 件');
+  
+  if (includePrice) {
+    lines.push('總金額（' + t1 + '）：$' + totalP1.toFixed(2));
+    if (cmp) {
+      const totalP2 = selectedProducts.reduce((s, p) => s + p[t2] * p.quantity, 0);
+      lines.push('總金額（' + t2 + '）：$' + totalP2.toFixed(2));
+    }
+  }
+
+  if (includeProfit && cmp) {
     const totalPr = selectedProducts.reduce((s, p) => {
       if (p.type === 'package' && p.fixedProfit !== undefined) return s + p.fixedProfit * p.quantity;
       return s + Math.abs(p[t2] - p[t1]) * p.quantity;
     }, 0);
-    lines.push('總金額（' + t2 + '）：$' + totalP2.toFixed(2), '💰 總利潤：' + formatProfit(totalPr));
+    lines.push('💰 總利潤：' + formatProfit(totalPr));
   }
-  lines.push('總VP：' + totalVP.toFixed(2));
-  if (pkgProds.length > 0) {
+
+  if (includeVP) {
+    lines.push('總VP：' + totalVP.toFixed(2));
+  }
+
+  if (includeProfit && pkgProds.length > 0) {
     lines.push('', '💰 套裝固定利潤');
     pkgProds.forEach(p => lines.push('  ' + p.prod_name + ' ×' + p.quantity + '：' + formatProfit(p.fixedProfit * p.quantity)));
     lines.push('  套裝利潤合計：' + formatProfit(totalPkgPr));
   }
+
   const text = lines.join('\n');
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(() => showToast('✅ 已複製！')).catch(() => fallbackCopy(text));
