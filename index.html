@@ -874,7 +874,7 @@ function filterProducts() {
     item.className = 'product-item' + (isPkg ? ' product-item-package' : '');
     const sel = selectedProducts.find(p => p.stock_no === product.stock_no);
     const badge = sel ? `<span class="selected-badge">✓ ${sel.quantity}</span>` : '';
-    const price = '$' + Math.round(product[t1]);
+    const price = isPkg ? '$' + Math.round(product[t1]) : '$' + product[t1].toFixed(2);
     item.innerHTML = `<div class="product-item-inner">
       <div class="product-item-left">${badge}<strong>${product.stock_no}</strong> - ${product.prod_name}${isPkg ? ' <span style="color:#7c3aed;font-size:0.78em;">[套裝]</span>' : ''}</div>
       <div class="product-item-price">${price}</div>
