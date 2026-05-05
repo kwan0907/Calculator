@@ -508,7 +508,18 @@ td.product-name { min-width: 80px; max-width: 140px; word-break: keep-all; word-
     </div>
   </div>
 </div>
-
+<!-- 新產品上架通知 Modal -->
+<div class="modal-overlay" id="new-product-modal" style="z-index: 2500;">
+  <div class="modal" style="text-align: center;">
+    <div class="modal-title" style="color: #2c7be5; font-size: 1.3rem; margin-bottom: 15px;">🎉 最新消息</div>
+    <div class="modal-content" style="font-size: 1.1rem; color: #333;">
+      新產品已經上架啦！
+    </div>
+    <div class="modal-actions" style="justify-content: center; margin-top: 20px;">
+      <button class="btn-primary" onclick="closeNewProductModal()" style="width: 100%; padding: 12px; font-size: 1rem;">我知道了</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast-message"></div>
 
 <script>
@@ -1155,6 +1166,19 @@ function initPWA() {
     showToast('✅ App 已成功安裝到主畫面！');
   });
 
+  // 關閉新產品通知，並記錄到瀏覽器
+function closeNewProductModal() {
+  document.getElementById('new-product-modal').style.display = 'none';
+  localStorage.setItem('seen_new_product_liver', 'true');
+}
+
+// 檢查是否需要顯示通知
+function checkNewProductNotification() {
+  if (!localStorage.getItem('seen_new_product_liver')) {
+    document.getElementById('new-product-modal').style.display = 'flex';
+  }
+}
+  
   // 已安裝狀態隱藏安裝按鈕
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   if (!isStandalone) setTimeout(showPwaInstallBtn, 600);
@@ -1190,6 +1214,8 @@ window.onload = function () {
   initCategories();
   switchView('table'); // ← 永遠默認表格視圖，用戶仍可手動切換
   updateProductDisplay();
+  // 新增這一行來觸發卡片檢查
+  checkNewProductNotification();
   document.addEventListener('touchend', function (e) {
     const btn = e.target.closest('button');
     if (btn) setTimeout(() => btn.blur(), 50);
