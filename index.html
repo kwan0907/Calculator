@@ -1208,14 +1208,30 @@ function handlePwaInstall() {
 // ============================================================
 // ===== PWA END =====
 // ============================================================
+
+// 1. 關閉新產品通知，並記錄到瀏覽器 (放在這裡)
+function closeNewProductModal() {
+  document.getElementById('new-product-modal').style.display = 'none';
+  localStorage.setItem('seen_new_product_liver', 'true');
+}
+
+// 2. 檢查是否需要顯示通知 (放在這裡)
+function checkNewProductNotification() {
+  if (!localStorage.getItem('seen_new_product_liver')) {
+    document.getElementById('new-product-modal').style.display = 'flex';
+  }
+}
+
 window.onload = function () {
   initPWA();
   initFontSize();   // ← 字體大小初始化（讀取上次設定）
   initCategories();
   switchView('table'); // ← 永遠默認表格視圖，用戶仍可手動切換
   updateProductDisplay();
-  // 新增這一行來觸發卡片檢查
+  
+  // 3. 觸發卡片檢查
   checkNewProductNotification();
+  
   document.addEventListener('touchend', function (e) {
     const btn = e.target.closest('button');
     if (btn) setTimeout(() => btn.blur(), 50);
