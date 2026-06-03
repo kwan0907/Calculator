@@ -917,34 +917,37 @@ function addProduct(product) {
   setTimeout(() => newlyAddedStockNos.clear(), 400);
 }
   // ============================================================
-// ===== 快捷組合：大餐四寶 =====
+// ===== 快捷組合：大餐四寶 (含防誤觸二次確認) =====
 // ============================================================
 function addBigMealCombo() {
-  // 產品編號對應：美纖片(0079), 甲殼纖維素(0210), 消脂片(0111), 抗脂片(0130)
-  const stockNos = ["0079", "0210", "0111", "0130"];
-  let added = false;
+  // 使用網頁內建的確認對話框
+  showConfirmDialog('確定要快捷添加「大餐四寶」到購物車嗎？', () => {
+    // 點擊「確定」後才會執行以下添加邏輯
+    const stockNos = ["0079", "0210", "0111", "0130"];
+    let added = false;
 
-  stockNos.forEach(stockNo => {
-    const product = productsData.find(p => p.stock_no === stockNo);
-    if (product) {
-      const existing = selectedProducts.find(p => p.stock_no === stockNo);
-      if (existing) {
-        existing.quantity += 1; // 如果已經在購物車，數量 +1
-      } else {
-        selectedProducts.push({ ...product, quantity: 1 }); // 如果沒有，新增一筆
-        newlyAddedStockNos.add(stockNo); // 加入動畫效果標記
+    stockNos.forEach(stockNo => {
+      const product = productsData.find(p => p.stock_no === stockNo);
+      if (product) {
+        const existing = selectedProducts.find(p => p.stock_no === stockNo);
+        if (existing) {
+          existing.quantity += 1; // 如果已經在購物車，數量 +1
+        } else {
+          selectedProducts.push({ ...product, quantity: 1 }); // 如果沒有，新增一筆
+          newlyAddedStockNos.add(stockNo); // 加入動畫效果標記
+        }
+        added = true;
       }
-      added = true;
+    });
+
+    if (added) {
+      updateProductDisplay(); // 更新畫面表格/卡片與總計
+      showToast('🍽️ 已成功添加：大餐四寶 (4件獨立產品)');
+      
+      // 延遲清除動畫標記
+      setTimeout(() => newlyAddedStockNos.clear(), 400);
     }
   });
-
-  if (added) {
-    updateProductDisplay(); // 更新畫面表格/卡片與總計
-    showToast('🍽️ 已成功添加：大餐四寶 (4件獨立產品)');
-    
-    // 延遲清除動畫標記，讓畫面有閃爍提示效果
-    setTimeout(() => newlyAddedStockNos.clear(), 400);
-  }
 }
 function addPackagePlan(stockNo) {
   const plan = productsData.find(p => p.stock_no === stockNo);
