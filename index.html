@@ -448,6 +448,11 @@ td.product-name { min-width: 80px; max-width: 140px; word-break: keep-all; word-
   </div>
 </div>
 
+  <div class="shortcut-section" style="margin-bottom: 8px;">
+  <button class="btn-add-product" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 3px 10px rgba(16,185,129,0.3);" onclick="addBigMealCombo()">
+    🍽️ 快捷添加：大餐四寶 (美纖、甲殼、消脂、抗脂)
+  </button>
+</div>
 <div class="product-selection">
   <button class="btn-add-product" onclick="openSearchModal()">🔍 搜尋添加產品</button>
 </div>
@@ -909,6 +914,36 @@ function addProduct(product) {
   else { selectedProducts.push({ ...product, quantity: 1 }); newlyAddedStockNos.add(product.stock_no); showToast(`已添加：${product.prod_name}`); }
   updateProductDisplay(); filterProducts();
   setTimeout(() => newlyAddedStockNos.clear(), 400);
+}
+  // ============================================================
+// ===== 快捷組合：大餐四寶 =====
+// ============================================================
+function addBigMealCombo() {
+  // 產品編號對應：美纖片(0079), 甲殼纖維素(0210), 消脂片(0111), 抗脂片(0130)
+  const stockNos = ["0079", "0210", "0111", "0130"];
+  let added = false;
+
+  stockNos.forEach(stockNo => {
+    const product = productsData.find(p => p.stock_no === stockNo);
+    if (product) {
+      const existing = selectedProducts.find(p => p.stock_no === stockNo);
+      if (existing) {
+        existing.quantity += 1; // 如果已經在購物車，數量 +1
+      } else {
+        selectedProducts.push({ ...product, quantity: 1 }); // 如果沒有，新增一筆
+        newlyAddedStockNos.add(stockNo); // 加入動畫效果標記
+      }
+      added = true;
+    }
+  });
+
+  if (added) {
+    updateProductDisplay(); // 更新畫面表格/卡片與總計
+    showToast('🍽️ 已成功添加：大餐四寶 (4件獨立產品)');
+    
+    // 延遲清除動畫標記，讓畫面有閃爍提示效果
+    setTimeout(() => newlyAddedStockNos.clear(), 400);
+  }
 }
 function addPackagePlan(stockNo) {
   const plan = productsData.find(p => p.stock_no === stockNo);
