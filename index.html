@@ -1371,9 +1371,11 @@ function closeNewProductModal() {
 }
 
 function checkNewProductNotification() {
-  if (!localStorage.getItem('seen_new_product_liver_fixed')) {
+  // 將原本的 'seen_new_product_liver_fixed' 換成全新的 key
+  if (!localStorage.getItem('nightMode_282K_confirmed')) {
     document.getElementById('new-product-modal').style.display = 'flex';
-    localStorage.setItem('seen_new_product_liver_fixed', 'true');
+    // 使用者點擊後，寫入新的 key，以後就不會再彈出
+    localStorage.setItem('nightMode_282K_confirmed', 'true');
   }
 }
 
