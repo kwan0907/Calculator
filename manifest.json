@@ -2,7 +2,7 @@
   "name": "產品計算器V3",
   "short_name": "計算器V3",
   "description": "Herbalife 產品計算器",
-  "start_url": "./",
+  "start_url": "./offline.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
