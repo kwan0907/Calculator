@@ -454,6 +454,77 @@ tr.package-row td:not(.product-name) { color: var(--color-pkg); font-weight: 700
   .app-splash-loader::after { background: #38bdf8; }
 }
 
+
+/* ===== 暗黑模式舒適配色測試：只覆蓋深色模式 ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-gradient: linear-gradient(-45deg, #0b1220, #111827, #132238, #172033);
+    --glass-bg: rgba(17, 24, 39, 0.90);
+    --glass-bg-solid: rgba(17, 24, 39, 0.98);
+    --glass-border: rgba(148, 163, 184, 0.16);
+    --glass-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.42);
+    --glass-item-bg: rgba(59, 130, 246, 0.08);
+    --glass-item-hover: rgba(96, 165, 250, 0.14);
+    --text-main: #e5e7eb;
+    --text-muted: #9ca3af;
+    --text-heading: #f8fafc;
+    --primary-color: #60a5fa;
+    --primary-hover: #3b82f6;
+    --danger-bg: rgba(190, 24, 93, 0.90);
+    --danger-hover: #9f1239;
+    --copy-bg: rgba(37, 99, 235, 0.94);
+    --copy-hover: #1d4ed8;
+    --clear-bg: rgba(244, 63, 94, 0.10);
+    --clear-text: #fda4af;
+    --clear-border: rgba(251, 113, 133, 0.28);
+    --clear-hover-bg: rgba(244, 63, 94, 0.16);
+    --clear-hover-text: #fecdd3;
+    --table-head-bg: rgba(17, 24, 39, 0.96);
+    --table-border: rgba(148, 163, 184, 0.12);
+    --table-row-even: rgba(255, 255, 255, 0.025);
+    --table-row-hover: rgba(59, 130, 246, 0.08);
+    --color-profit: #6ee7b7;
+    --color-profit-bg: rgba(6, 78, 59, 0.34);
+    --color-profit-border: rgba(52, 211, 153, 0.24);
+    --color-pkg: #c4b5fd;
+    --color-pkg-bg: rgba(76, 29, 149, 0.22);
+    --color-pkg-border: rgba(139, 92, 246, 0.26);
+    --cart-item-bg: rgba(59, 130, 246, 0.07);
+    --cart-item-border: rgba(96, 165, 250, 0.20);
+    --cart-price-color: #93c5fd;
+    --cart-summary-bg: rgba(17, 24, 39, 0.96);
+    --modal-overlay: rgba(2, 6, 23, 0.76);
+    --modal-bg: rgba(17, 24, 39, 0.99);
+    --input-bg: rgba(15, 23, 42, 0.72);
+  }
+  .btn-primary,
+  .btn-copy { background: #1d4ed8; }
+  .btn-primary:hover,
+  .btn-copy:hover { background: #1e40af !important; }
+  .btn-add-product {
+    background: linear-gradient(135deg, #2563eb, #1e3a8a);
+    box-shadow: 0 4px 10px rgba(30, 64, 175, 0.22);
+  }
+  .btn-add-product:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e3a8a) !important;
+  }
+  .shortcut-section .btn-add-product {
+    background: linear-gradient(135deg, rgba(5,150,105,0.94), rgba(4,120,87,0.94)) !important;
+    box-shadow: 0 4px 10px rgba(4,120,87,0.20) !important;
+  }
+  .shortcut-section .btn-add-product:hover {
+    background: linear-gradient(135deg, rgba(4,120,87,1), rgba(6,95,70,1)) !important;
+  }
+  .package-plan-btn {
+    background: rgba(91, 33, 182, 0.88);
+    border-color: rgba(196, 181, 253, 0.18);
+  }
+  .package-plan-btn:hover { background: rgba(76, 29, 149, 0.96) !important; }
+  .package-plan-btn:active { background: rgba(67, 24, 133, 1) !important; }
+  .plan-price { color: #fde68a; }
+  .plan-profit { color: #a7f3d0; }
+}
+
 </style>
 </head>
 <body>
