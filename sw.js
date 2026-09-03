@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calculator-static-v2-20260903';
+const CACHE_NAME = 'calculator-static-v3-20260903';
 const APP_SHELL = ['./', './index.html', './manifest.json', './IMG_4289.png'];
 
 self.addEventListener('install', (event) => {
@@ -14,39 +14,34 @@ self.addEventListener('activate', (event) => {
     caches.keys()
       .then((keys) => Promise.all(
         keys
-.filter((key) => key.startsWith('calculator-') && key !== CACHE_NAME)
-.map((key) => caches.delete(key))
+          .filter((key) => key.startsWith('calculator-') && key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
       ))
       .then(() => self.clients.claim())
   );
 });
 
-async function navigationResponse(request) {
+async function navigationResponse(request, event) {
   const cache = await caches.open(CACHE_NAME);
-  const fallback = (await cache.match(request)) || (await cache.match('./index.html')) || (await cache.match('./'));
+  const cached = (await cache.match(request)) || (await cache.match('./index.html')) || (await cache.match('./'));
 
-  const networkPromise = fetch(request).then(async (response) => {
+  const refresh = fetch(request).then(async (response) => {
     if (response && response.ok) {
       await cache.put(request, response.clone()).catch(() => {});
       await cache.put('./index.html', response.clone()).catch(() => {});
     }
     return response;
-  });
+  }).catch(() => null);
 
-  let timer;
-  const timeout = new Promise((_, reject) => {
-    timer = setTimeout(() => reject(new Error('network timeout')), 3000);
-  });
-
-  try {
-    const response = await Promise.race([networkPromise, timeout]);
-    clearTimeout(timer);
-    return response;
-  } catch (error) {
-    clearTimeout(timer);
-    if (fallback) return fallback;
-    throw error;
+  if (cached) {
+    // 有快取就立即開 App，不再因弱網絡等待；同時背景更新下一次啟動用的版本。
+    if (event) event.waitUntil(refresh);
+    return cached;
   }
+
+  const response = await refresh;
+  if (response) return response;
+  throw new Error('offline and no cached app shell');
 }
 
 async function staticResponse(request) {
@@ -70,7 +65,7 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(navigationResponse(request).catch(async () => {
+    event.respondWith(navigationResponse(request, event).catch(async () => {
       const cache = await caches.open(CACHE_NAME);
       return (await cache.match('./index.html')) || new Response('', { status: 503 });
     }));

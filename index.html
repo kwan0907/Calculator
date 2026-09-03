@@ -292,6 +292,7 @@ tr.package-row td:not(.product-name) { color: var(--color-pkg); font-weight: 700
 @media (min-width: 768px) {
   .cart-summary { max-width: 1200px; margin: 0 auto; border-left: 1px solid var(--cart-item-border); border-right: 1px solid var(--cart-item-border); }
 }
+.cart-summary-date { margin-bottom: 7px; font-size: 0.78rem; color: var(--text-muted); font-weight: 800; text-align: right; }
 .cart-summary-top-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-muted); font-weight: 700; }
 .cart-summary-val { color: var(--text-heading); font-weight: 900; margin-left: 4px; }
 .cart-summary-bottom-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(14, 165, 233, 0.3); padding-top: 10px; }
@@ -586,6 +587,7 @@ tr.package-row td:not(.product-name) { color: var(--color-pkg); font-weight: 700
 <div id="cart-container" class="cart-container" style="display:none;">
   <div id="cart-view-content" class="cart-scroll-area"></div>
   <div id="cart-summary-section" class="cart-summary">
+    <div class="cart-summary-date">📅 日期：<span id="cart-current-date"></span></div>
     <div class="cart-summary-top-row">
       <div>總產品數量: <span id="cart-total-qty" class="cart-summary-val">0</span></div>
       <div>總VP分數: <span id="cart-total-vp" class="cart-summary-val">0.00</span></div>
@@ -1298,6 +1300,14 @@ function updateProductCards() {
   });
 }
 
+function updateCartDate() {
+  const el = document.getElementById('cart-current-date');
+  if (!el) return;
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  el.textContent = `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+}
+
 function updateCartView() {
   const cc = document.getElementById('cart-view-content');
   const t1 = document.getElementById('pricing-tier1').value;
@@ -1310,6 +1320,7 @@ function updateCartView() {
   }
   
   document.getElementById('cart-summary-section').style.display = 'block';
+  updateCartDate();
   
   let totalQty = 0;
   let totalPrice = 0;
