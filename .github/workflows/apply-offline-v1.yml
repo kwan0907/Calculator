@@ -1,0 +1,157 @@
+name: Apply invisible offline layer
+
+on:
+  push:
+    branches:
+      - offline-v1
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply minimal offline changes
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          index = Path('index.html')
+          text = index.read_text(encoding='utf-8')
+
+          pattern = re.compile(
+              r"    const swCode = .*?\n"
+              r"    try \{\n"
+              r"      navigator\.serviceWorker\.register\(URL\.createObjectURL\(new Blob\(\[swCode\], \{ type: 'application/javascript' \}\)\)\)\n"
+              r"        \.then\(\(\) => console\.log\('✅ PWA ServiceWorker 已啟用'\)\)\.catch\(\(\) => \{\}\);\n"
+              r"    \} catch \(e\) \{\}",
+              re.S,
+          )
+          replacement = """    try {
+                navigator.serviceWorker.register('./sw.js', { scope: './' })
+                  .then(() => console.log('✅ PWA ServiceWorker 已啟用')).catch(() => {});
+              } catch (e) {}"""
+          text2, count = pattern.subn(replacement, text, count=1)
+          if count != 1:
+              raise SystemExit(f'Expected to replace one Service Worker block, replaced {count}')
+          index.write_text(text2, encoding='utf-8')
+
+          sw = r"""const CACHE_NAME = 'calculator-static-v2-20260903';
+          const APP_SHELL = ['./', './index.html', './manifest.json', './IMG_4289.png'];
+
+          self.addEventListener('install', (event) => {
+            event.waitUntil(
+              caches.open(CACHE_NAME)
+                .then((cache) => cache.addAll(APP_SHELL))
+                .then(() => self.skipWaiting())
+            );
+          });
+
+          self.addEventListener('activate', (event) => {
+            event.waitUntil(
+              caches.keys()
+                .then((keys) => Promise.all(
+                  keys
+                    .filter((key) => key.startsWith('calculator-') && key !== CACHE_NAME)
+                    .map((key) => caches.delete(key))
+                ))
+                .then(() => self.clients.claim())
+            );
+          });
+
+          async function navigationResponse(request) {
+            const cache = await caches.open(CACHE_NAME);
+            const fallback = (await cache.match(request)) || (await cache.match('./index.html')) || (await cache.match('./'));
+
+            const networkPromise = fetch(request).then(async (response) => {
+              if (response && response.ok) {
+                await cache.put(request, response.clone()).catch(() => {});
+                await cache.put('./index.html', response.clone()).catch(() => {});
+              }
+              return response;
+            });
+
+            let timer;
+            const timeout = new Promise((_, reject) => {
+              timer = setTimeout(() => reject(new Error('network timeout')), 3000);
+            });
+
+            try {
+              const response = await Promise.race([networkPromise, timeout]);
+              clearTimeout(timer);
+              return response;
+            } catch (error) {
+              clearTimeout(timer);
+              if (fallback) return fallback;
+              throw error;
+            }
+          }
+
+          async function staticResponse(request) {
+            const cache = await caches.open(CACHE_NAME);
+            const cached = await cache.match(request);
+            if (cached) {
+              fetch(request).then((response) => {
+                if (response && response.ok) cache.put(request, response.clone()).catch(() => {});
+              }).catch(() => {});
+              return cached;
+            }
+            const response = await fetch(request);
+            if (response && response.ok) cache.put(request, response.clone()).catch(() => {});
+            return response;
+          }
+
+          self.addEventListener('fetch', (event) => {
+            const request = event.request;
+            if (request.method !== 'GET') return;
+            const url = new URL(request.url);
+            if (url.origin !== self.location.origin) return;
+
+            if (request.mode === 'navigate') {
+              event.respondWith(navigationResponse(request).catch(async () => {
+                const cache = await caches.open(CACHE_NAME);
+                return (await cache.match('./index.html')) || new Response('', { status: 503 });
+              }));
+              return;
+            }
+
+            event.respondWith(staticResponse(request).catch(() => new Response('', { status: 503 })));
+          });
+          """
+          Path('sw.js').write_text('\n'.join(line[10:] if line.startswith('          ') else line for line in sw.splitlines()) + '\n', encoding='utf-8')
+
+          # Restore the original PWA start URL exactly as production uses it.
+          manifest = Path('manifest.json').read_text(encoding='utf-8')
+          manifest = manifest.replace('"start_url": "./offline.html"', '"start_url": "./"')
+          Path('manifest.json').write_text(manifest, encoding='utf-8')
+
+          # Keep existing Netlify behavior; only add a no-cache rule for the Service Worker file.
+          headers = Path('_headers').read_text(encoding='utf-8')
+          main_headers = """/manifest.json
+            Content-Type: application/manifest+json; charset=utf-8
+          /*.png
+           /IMG_4289.png
+            Cache-Control: public, max-age=31536000, immutable
+          """
+          main_headers = '\n'.join(line[10:] if line.startswith('          ') else line for line in main_headers.splitlines()) + '\n'
+          headers = main_headers + "\n/sw.js\n  Content-Type: application/javascript; charset=utf-8\n  Cache-Control: no-cache, no-store, must-revalidate\n  Service-Worker-Allowed: /\n"
+          Path('_headers').write_text(headers, encoding='utf-8')
+
+          Path('offline.html').unlink(missing_ok=True)
+          Path('OFFLINE_TEST.md').unlink(missing_ok=True)
+          Path('.github/workflows/apply-offline-v1.yml').unlink(missing_ok=True)
+
+      - name: Commit refined test branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Make offline support invisible and preserve original URL"
+          git push origin HEAD:offline-v1
