@@ -1,0 +1,31 @@
+name: Adjust cart footer clearance
+
+on:
+  push:
+    paths:
+      - '.github/workflows/adjust-cart-padding-v2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: weak-network-cart-date
+      - name: Patch spacing
+        shell: bash
+        run: |
+          echo 'ZnJvbSBwYXRobGliIGltcG9ydCBQYXRoCnA9UGF0aCgnaW5kZXguaHRtbCcpCnM9cC5yZWFkX3RleHQoZW5jb2Rpbmc9J3V0Zi04JykKcz1zLnJlcGxhY2UoJy5jYXJ0LXNjcm9sbC1hcmVhIHsgcGFkZGluZy1ib3R0b206IDExMHB4OyB9JywgJy5jYXJ0LXNjcm9sbC1hcmVhIHsgcGFkZGluZy1ib3R0b206IDEzOHB4OyB9JywgMSkKcC53cml0ZV90ZXh0KHMsIGVuY29kaW5nPSd1dGYtOCcpCg==' | base64 -d > /tmp/patch.py
+          python3 /tmp/patch.py
+      - name: Commit
+        shell: bash
+        run: |
+          rm -f .github/workflows/adjust-cart-padding-v2.yml
+          git config user.name "kwan0907"
+          git config user.email "63507197+kwan0907@users.noreply.github.com"
+          git add index.html .github/workflows/adjust-cart-padding-v2.yml
+          git commit -m "Keep cart items clear of dated summary"
+          git push origin HEAD:weak-network-cart-date
