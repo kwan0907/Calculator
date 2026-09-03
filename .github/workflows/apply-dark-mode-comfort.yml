@@ -15,165 +15,20 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: color-dark-test-v1
-
       - name: Patch dark mode colors only
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-
+          import base64
+          css = base64.b64decode('Ci8qID09PT09IOaal+m7keaooeW8j+iIkumBqemFjeiJsua4rOippu+8muWPquimhuiTi+a3seiJsuaooeW8jyA9PT09PSAqLwpAbWVkaWEgKHByZWZlcnMtY29sb3Itc2NoZW1lOiBkYXJrKSB7CiAgOnJvb3QgewogICAgLS1iZy1ncmFkaWVudDogbGluZWFyLWdyYWRpZW50KC00NWRlZywgIzBiMTIyMCwgIzExMTgyNywgIzEzMjIzOCwgIzE3MjAzMyk7CiAgICAtLWdsYXNzLWJnOiByZ2JhKDE3LCAyNCwgMzksIDAuOTApOwogICAgLS1nbGFzcy1iZy1zb2xpZDogcmdiYSgxNywgMjQsIDM5LCAwLjk4KTsKICAgIC0tZ2xhc3MtYm9yZGVyOiByZ2JhKDE0OCwgMTYzLCAxODQsIDAuMTYpOwogICAgLS1nbGFzcy1zaGFkb3c6IDAgNHB4IDIwcHggMCByZ2JhKDAsIDAsIDAsIDAuNDIpOwogICAgLS1nbGFzcy1pdGVtLWJnOiByZ2JhKDU5LCAxMzAsIDI0NiwgMC4wOCk7CiAgICAtLWdsYXNzLWl0ZW0taG92ZXI6IHJnYmEoOTYsIDE2NSwgMjUwLCAwLjE0KTsKICAgIC0tdGV4dC1tYWluOiAjZTVlN2ViOwogICAgLS10ZXh0LW11dGVkOiAjOWNhM2FmOwogICAgLS10ZXh0LWhlYWRpbmc6ICNmOGZhZmM7CiAgICAtLXByaW1hcnktY29sb3I6ICM2MGE1ZmE7CiAgICAtLXByaW1hcnktaG92ZXI6ICMzYjgyZjY7CiAgICAtLWRhbmdlci1iZzogcmdiYSgxOTAsIDI0LCA5MywgMC45MCk7CiAgICAtLWRhbmdlci1ob3ZlcjogIzlmMTIzOTsKICAgIC0tY29weS1iZzogcmdiYSgzNywgOTksIDIzNSwgMC45NCk7CiAgICAtLWNvcHktaG92ZXI6ICMxZDRlZDg7CiAgICAtLWNsZWFyLWJnOiByZ2JhKDI0NCwgNjMsIDk0LCAwLjEwKTsKICAgIC0tY2xlYXItdGV4dDogI2ZkYTRhZjsKICAgIC0tY2xlYXItYm9yZGVyOiByZ2JhKDI1MSwgMTEzLCAxMzMsIDAuMjgpOwogICAgLS1jbGVhci1ob3Zlci1iZzogcmdiYSgyNDQsIDYzLCA5NCwgMC4xNik7CiAgICAtLWNsZWFyLWhvdmVyLXRleHQ6ICNmZWNkZDM7CiAgICAtLXRhYmxlLWhlYWQtYmc6IHJnYmEoMTcsIDI0LCAzOSwgMC45Nik7CiAgICAtLXRhYmxlLWJvcmRlcjogcmdiYSgxNDgsIDE2MywgMTg0LCAwLjEyKTsKICAgIC0tdGFibGUtcm93LWV2ZW46IHJnYmEoMjU1LCAyNTUsIDI1NSwgMC4wMjUpOwogICAgLS10YWJsZS1yb3ctaG92ZXI6IHJnYmEoNTksIDEzMCwgMjQ2LCAwLjA4KTsKICAgIC0tY29sb3ItcHJvZml0OiAjNmVlN2I3OwogICAgLS1jb2xvci1wcm9maXQtYmc6IHJnYmEoNiwgNzgsIDU5LCAwLjM0KTsKICAgIC0tY29sb3ItcHJvZml0LWJvcmRlcjogcmdiYSg1MiwgMjExLCAxNTMsIDAuMjQpOwogICAgLS1jb2xvci1wa2c6ICNjNGI1ZmQ7CiAgICAtLWNvbG9yLXBrZy1iZzogcmdiYSg3NiwgMjksIDE0OSwgMC4yMik7CiAgICAtLWNvbG9yLXBrZy1ib3JkZXI6IHJnYmEoMTM5LCA5MiwgMjQ2LCAwLjI2KTsKICAgIC0tY2FydC1pdGVtLWJnOiByZ2JhKDU5LCAxMzAsIDI0NiwgMC4wNyk7CiAgICAtLWNhcnQtaXRlbS1ib3JkZXI6IHJnYmEoOTYsIDE2NSwgMjUwLCAwLjIwKTsKICAgIC0tY2FydC1wcmljZS1jb2xvcjogIzkzYzVmZDsKICAgIC0tY2FydC1zdW1tYXJ5LWJnOiByZ2JhKDE3LCAyNCwgMzksIDAuOTYpOwogICAgLS1tb2RhbC1vdmVybGF5OiByZ2JhKDIsIDYsIDIzLCAwLjc2KTsKICAgIC0tbW9kYWwtYmc6IHJnYmEoMTcsIDI0LCAzOSwgMC45OSk7CiAgICAtLWlucHV0LWJnOiByZ2JhKDE1LCAyMywgNDIsIDAuNzIpOwogIH0KICAuYnRuLXByaW1hcnksCiAgLmJ0bi1jb3B5IHsgYmFja2dyb3VuZDogIzFkNGVkODsgfQogIC5idG4tcHJpbWFyeTpob3ZlciwKICAuYnRuLWNvcHk6aG92ZXIgeyBiYWNrZ3JvdW5kOiAjMWU0MGFmICFpbXBvcnRhbnQ7IH0KICAuYnRuLWFkZC1wcm9kdWN0IHsKICAgIGJhY2tncm91bmQ6IGxpbmVhci1ncmFkaWVudCgxMzVkZWcsICMyNTYzZWIsICMxZTNhOGEpOwogICAgYm94LXNoYWRvdzogMCA0cHggMTBweCByZ2JhKDMwLCA2NCwgMTc1LCAwLjIyKTsKICB9CiAgLmJ0bi1hZGQtcHJvZHVjdDpob3ZlciB7CiAgICBiYWNrZ3JvdW5kOiBsaW5lYXItZ3JhZGllbnQoMTM1ZGVnLCAjMWQ0ZWQ4LCAjMWUzYThhKSAhaW1wb3J0YW50OwogIH0KICAuc2hvcnRjdXQtc2VjdGlvbiAuYnRuLWFkZC1wcm9kdWN0IHsKICAgIGJhY2tncm91bmQ6IGxpbmVhci1ncmFkaWVudCgxMzVkZWcsIHJnYmEoNSwxNTAsMTA1LDAuOTQpLCByZ2JhKDQsMTIwLDg3LDAuOTQpKSAhaW1wb3J0YW50OwogICAgYm94LXNoYWRvdzogMCA0cHggMTBweCByZ2JhKDQsMTIwLDg3LDAuMjApICFpbXBvcnRhbnQ7CiAgfQogIC5zaG9ydGN1dC1zZWN0aW9uIC5idG4tYWRkLXByb2R1Y3Q6aG92ZXIgewogICAgYmFja2dyb3VuZDogbGluZWFyLWdyYWRpZW50KDEzNWRlZywgcmdiYSg0LDEyMCw4NywxKSwgcmdiYSg2LDk1LDcwLDEpKSAhaW1wb3J0YW50OwogIH0KICAucGFja2FnZS1wbGFuLWJ0biB7CiAgICBiYWNrZ3JvdW5kOiByZ2JhKDkxLCAzMywgMTgyLCAwLjg4KTsKICAgIGJvcmRlci1jb2xvcjogcmdiYSgxOTYsIDE4MSwgMjUzLCAwLjE4KTsKICB9CiAgLnBhY2thZ2UtcGxhbi1idG46aG92ZXIgeyBiYWNrZ3JvdW5kOiByZ2JhKDc2LCAyOSwgMTQ5LCAwLjk2KSAhaW1wb3J0YW50OyB9CiAgLnBhY2thZ2UtcGxhbi1idG46YWN0aXZlIHsgYmFja2dyb3VuZDogcmdiYSg2NywgMjQsIDEzMywgMSkgIWltcG9ydGFudDsgfQogIC5wbGFuLXByaWNlIHsgY29sb3I6ICNmZGU2OGE7IH0KICAucGxhbi1wcm9maXQgeyBjb2xvcjogI2E3ZjNkMDsgfQp9Cg==').decode('utf-8')
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-
-          old = '''@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-gradient: linear-gradient(-45deg, #082f49, #0f172a, #0c4a6e, #1e293b);
-    --glass-bg: rgba(15, 23, 42, 0.88);
-    --glass-bg-solid: rgba(15, 23, 42, 0.98);
-    --glass-border: rgba(56, 189, 248, 0.25);
-    --glass-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.5);
-    --glass-item-bg: rgba(14, 165, 233, 0.12);
-    --glass-item-hover: rgba(56, 189, 248, 0.2);
-    
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --text-heading: #e0f2fe;
-    
-    --primary-color: #38bdf8;
-    --primary-hover: #0ea5e9;
-    --danger-bg: rgba(244, 63, 94, 0.95);
-    --danger-hover: #e11d48;
-    --copy-bg: rgba(14, 165, 233, 0.95);
-    --copy-hover: #0284c7;
-
-    --clear-bg: rgba(244, 63, 94, 0.15);
-    --clear-text: #fb7185;
-    --clear-border: rgba(244, 63, 94, 0.4);
-    --clear-hover-bg: rgba(244, 63, 94, 0.25);
-    --clear-hover-text: #f43f5e;
-    
-    --table-head-bg: rgba(15, 23, 42, 0.95);
-    --table-border: rgba(56, 189, 248, 0.2);
-    --table-row-even: rgba(14, 165, 233, 0.05);
-    --table-row-hover: rgba(14, 165, 233, 0.15);
-    
-    --color-profit: #4ade80;
-    --color-profit-bg: rgba(20, 83, 45, 0.6);
-    --color-profit-border: rgba(74, 222, 128, 0.4);
-    --color-pkg: #a78bfa;
-    --color-pkg-bg: rgba(91, 33, 182, 0.4);
-    --color-pkg-border: rgba(139, 92, 246, 0.4);
-
-    --cart-item-bg: rgba(14, 165, 233, 0.12);
-    --cart-item-border: rgba(56, 189, 248, 0.3);
-    --cart-price-color: #7dd3fc;
-    --cart-summary-bg: rgba(15, 23, 42, 0.92);
-    
-    --modal-overlay: rgba(0, 0, 0, 0.7);
-    --modal-bg: rgba(15, 23, 42, 0.98);
-    --input-bg: rgba(15, 23, 42, 0.6);
-  }
-}'''
-
-          new = '''@media (prefers-color-scheme: dark) {
-  :root {
-    /* 舒服暗黑：中性墨藍底，降低大面積藍光感 */
-    --bg-gradient: linear-gradient(-45deg, #0b1220, #111827, #132238, #172033);
-    --glass-bg: rgba(17, 24, 39, 0.90);
-    --glass-bg-solid: rgba(17, 24, 39, 0.98);
-    --glass-border: rgba(148, 163, 184, 0.16);
-    --glass-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.42);
-    --glass-item-bg: rgba(59, 130, 246, 0.08);
-    --glass-item-hover: rgba(96, 165, 250, 0.14);
-    
-    --text-main: #e5e7eb;
-    --text-muted: #9ca3af;
-    --text-heading: #f8fafc;
-    
-    /* 藍色只做重點，不用螢光藍 */
-    --primary-color: #60a5fa;
-    --primary-hover: #3b82f6;
-    --danger-bg: rgba(190, 24, 93, 0.90);
-    --danger-hover: #9f1239;
-    --copy-bg: rgba(37, 99, 235, 0.94);
-    --copy-hover: #1d4ed8;
-
-    --clear-bg: rgba(244, 63, 94, 0.10);
-    --clear-text: #fda4af;
-    --clear-border: rgba(251, 113, 133, 0.28);
-    --clear-hover-bg: rgba(244, 63, 94, 0.16);
-    --clear-hover-text: #fecdd3;
-    
-    --table-head-bg: rgba(17, 24, 39, 0.96);
-    --table-border: rgba(148, 163, 184, 0.12);
-    --table-row-even: rgba(255, 255, 255, 0.025);
-    --table-row-hover: rgba(59, 130, 246, 0.08);
-    
-    --color-profit: #6ee7b7;
-    --color-profit-bg: rgba(6, 78, 59, 0.34);
-    --color-profit-border: rgba(52, 211, 153, 0.24);
-    --color-pkg: #c4b5fd;
-    --color-pkg-bg: rgba(76, 29, 149, 0.22);
-    --color-pkg-border: rgba(139, 92, 246, 0.26);
-
-    --cart-item-bg: rgba(59, 130, 246, 0.07);
-    --cart-item-border: rgba(96, 165, 250, 0.20);
-    --cart-price-color: #93c5fd;
-    --cart-summary-bg: rgba(17, 24, 39, 0.96);
-    
-    --modal-overlay: rgba(2, 6, 23, 0.76);
-    --modal-bg: rgba(17, 24, 39, 0.99);
-    --input-bg: rgba(15, 23, 42, 0.72);
-  }
-}'''
-
-          if old not in s:
-              raise SystemExit('dark mode variable block not found')
-          s = s.replace(old, new, 1)
-
-          anchor = '''.package-plan-btn:active { background: rgba(76, 29, 149, 1) !important; color: white !important; transform: scale(0.98); }'''
-          dark_overrides = '''.package-plan-btn:active { background: rgba(76, 29, 149, 1) !important; color: white !important; transform: scale(0.98); }
-
-/* ===== 暗黑模式：降低大按鈕飽和度，保留清晰層級 ===== */
-@media (prefers-color-scheme: dark) {
-  .btn-primary,
-  .btn-copy { background: #1d4ed8; }
-  .btn-primary:hover,
-  .btn-copy:hover { background: #1e40af !important; }
-
-  .btn-add-product {
-    background: linear-gradient(135deg, #2563eb, #1e3a8a);
-    box-shadow: 0 4px 10px rgba(30, 64, 175, 0.22);
-  }
-  .btn-add-product:hover { background: linear-gradient(135deg, #1d4ed8, #1e3a8a) !important; }
-
-  .shortcut-section .btn-add-product {
-    background: linear-gradient(135deg, rgba(5,150,105,0.94), rgba(4,120,87,0.94)) !important;
-    box-shadow: 0 4px 10px rgba(4,120,87,0.20) !important;
-  }
-  .shortcut-section .btn-add-product:hover {
-    background: linear-gradient(135deg, rgba(4,120,87,1), rgba(6,95,70,1)) !important;
-  }
-
-  .package-plan-btn {
-    background: rgba(91, 33, 182, 0.88);
-    border-color: rgba(196, 181, 253, 0.18);
-  }
-  .package-plan-btn:hover { background: rgba(76, 29, 149, 0.96) !important; }
-  .package-plan-btn:active { background: rgba(67, 24, 133, 1) !important; }
-
-  .plan-price { color: #fde68a; }
-  .plan-profit { color: #a7f3d0; }
-}'''
-
-          if '/* ===== 暗黑模式：降低大按鈕飽和度' not in s:
-              if anchor not in s:
-                  raise SystemExit('package button anchor not found')
-              s = s.replace(anchor, dark_overrides, 1)
-
+          marker = '/* ===== 暗黑模式舒適配色測試：只覆蓋深色模式 ===== */'
+          if marker not in s:
+              s = s.replace('</style>', css + '\n</style>', 1)
           p.write_text(s, encoding='utf-8')
           PY
-
       - name: Commit dark palette and remove helper
         shell: bash
         run: |
