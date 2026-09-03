@@ -1,0 +1,139 @@
+name: Apply app splash screen
+
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-splash-v1.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: offline-v1
+      - name: Add invisible loading splash only
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          css_marker = '</style>\n</head>'
+          css = r'''
+/* ===== App 啟動畫面：只在載入期間顯示，不改正式介面 ===== */
+#app-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f9ff;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .22s ease, visibility .22s ease;
+}
+#app-splash.splash-hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.app-splash-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.app-splash-logo {
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+  object-fit: cover;
+  box-shadow: 0 10px 28px rgba(14,165,233,.16);
+  animation: appSplashPulse 1.25s ease-in-out infinite;
+}
+.app-splash-title {
+  font-size: 17px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: .02em;
+  color: #0f172a;
+}
+.app-splash-loader {
+  width: 28px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(14,165,233,.15);
+  position: relative;
+}
+.app-splash-loader::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 45%;
+  border-radius: inherit;
+  background: #0ea5e9;
+  animation: appSplashLoad 1s ease-in-out infinite;
+}
+@keyframes appSplashPulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.035); }
+}
+@keyframes appSplashLoad {
+  0% { left: -50%; }
+  100% { left: 105%; }
+}
+@media (prefers-color-scheme: dark) {
+  #app-splash { background: #0f172a; }
+  .app-splash-title { color: #e0f2fe; }
+  .app-splash-loader { background: rgba(56,189,248,.18); }
+  .app-splash-loader::after { background: #38bdf8; }
+}
+'''
+          if '#app-splash {' not in s:
+              if css_marker not in s:
+                  raise SystemExit('style marker not found')
+              s = s.replace(css_marker, css + '\n' + css_marker, 1)
+
+          body_marker = '<body>\n'
+          splash = r'''<div id="app-splash" aria-hidden="true">
+  <div class="app-splash-inner">
+    <img class="app-splash-logo" src="./IMG_4289.png" alt="">
+    <div class="app-splash-title">產品計算器</div>
+    <div class="app-splash-loader"></div>
+  </div>
+</div>
+<script>
+(function () {
+  function hideAppSplash() {
+    var splash = document.getElementById('app-splash');
+    if (!splash || splash.classList.contains('splash-hide')) return;
+    splash.classList.add('splash-hide');
+    setTimeout(function () { if (splash && splash.parentNode) splash.parentNode.removeChild(splash); }, 280);
+  }
+  window.addEventListener('load', function () { setTimeout(hideAppSplash, 120); }, { once: true });
+  setTimeout(hideAppSplash, 4500);
+})();
+</script>
+'''
+          if 'id="app-splash"' not in s:
+              if body_marker not in s:
+                  raise SystemExit('body marker not found')
+              s = s.replace(body_marker, body_marker + splash, 1)
+
+          p.write_text(s, encoding='utf-8')
+      - name: Remove temporary workflow and commit patch
+        run: |
+          rm -f .github/workflows/apply-splash-v1.yml
+          git config user.name "kwan0907"
+          git config user.email "63507197+kwan0907@users.noreply.github.com"
+          git add index.html .github/workflows/apply-splash-v1.yml
+          git commit -m "Add app-logo splash during startup" || exit 0
+          git push origin HEAD:offline-v1
