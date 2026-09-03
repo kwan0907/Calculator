@@ -22,46 +22,30 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-
-          new_css = '''.app-splash-logo {
-  width: 132px;
-  height: 132px;
-  border-radius: 30px;
-  object-fit: contain;
-  display: block;
-  box-shadow: 0 12px 32px rgba(14,165,233,.16);
-  animation: appSplashFloat 1.8s ease-in-out infinite;
-}'''
-
-          s, n1 = re.subn(
-              r'\.app-splash-mark \{.*?\}\n\.app-splash-mark svg \{.*?\}',
-              new_css,
-              s,
-              count=1,
-              flags=re.S,
-          )
+          new_css = "\n".join([
+              ".app-splash-logo {",
+              "  width: 132px;",
+              "  height: 132px;",
+              "  border-radius: 30px;",
+              "  object-fit: contain;",
+              "  display: block;",
+              "  box-shadow: 0 12px 32px rgba(14,165,233,.16);",
+              "  animation: appSplashFloat 1.8s ease-in-out infinite;",
+              "}",
+          ])
+          s, n1 = re.subn(r'\.app-splash-mark \{.*?\}\n\.app-splash-mark svg \{.*?\}', new_css, s, count=1, flags=re.S)
           if n1 != 1:
               raise SystemExit('splash mark CSS block not found')
-
-          s, n2 = re.subn(
-              r'    <div class="app-splash-mark" aria-hidden="true">\n      <svg.*?</svg>\n    </div>',
-              '    <img class="app-splash-logo" src="./IMG_4289.png" alt="">',
-              s,
-              count=1,
-              flags=re.S,
-          )
+          s, n2 = re.subn(r'    <div class="app-splash-mark" aria-hidden="true">\n      <svg.*?</svg>\n    </div>', '    <img class="app-splash-logo" src="./IMG_4289.png" alt="">', s, count=1, flags=re.S)
           if n2 != 1:
               raise SystemExit('splash mark HTML not found')
-
           old_dark = '  .app-splash-mark { background: linear-gradient(145deg, #2563eb, #1d4ed8 58%, #1e3a8a); border-color: rgba(147,197,253,.22); box-shadow: 0 14px 36px rgba(30,64,175,.26), inset 0 1px 0 rgba(255,255,255,.14); }'
           new_dark = '  .app-splash-logo { box-shadow: 0 12px 32px rgba(96,165,250,.14); }'
           if old_dark not in s:
               raise SystemExit('dark splash mark override not found')
           s = s.replace(old_dark, new_dark, 1)
-
           p.write_text(s, encoding='utf-8')
           PY
 
