@@ -15,121 +15,24 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: offline-v1
-      - name: Add invisible loading splash only
-        shell: python
+      - name: Patch index
+        shell: bash
         run: |
+          python3 - <<'PY'
           from pathlib import Path
+          import base64
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-
-          css_marker = '</style>\n</head>'
-          css = r'''
-/* ===== App 啟動畫面：只在載入期間顯示，不改正式介面 ===== */
-#app-splash {
-  position: fixed;
-  inset: 0;
-  z-index: 2147483647;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f0f9ff;
-  opacity: 1;
-  visibility: visible;
-  transition: opacity .22s ease, visibility .22s ease;
-}
-#app-splash.splash-hide {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-.app-splash-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-.app-splash-logo {
-  width: 96px;
-  height: 96px;
-  border-radius: 22px;
-  object-fit: cover;
-  box-shadow: 0 10px 28px rgba(14,165,233,.16);
-  animation: appSplashPulse 1.25s ease-in-out infinite;
-}
-.app-splash-title {
-  font-size: 17px;
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: .02em;
-  color: #0f172a;
-}
-.app-splash-loader {
-  width: 28px;
-  height: 3px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(14,165,233,.15);
-  position: relative;
-}
-.app-splash-loader::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 45%;
-  border-radius: inherit;
-  background: #0ea5e9;
-  animation: appSplashLoad 1s ease-in-out infinite;
-}
-@keyframes appSplashPulse {
-  0%,100% { transform: scale(1); }
-  50% { transform: scale(1.035); }
-}
-@keyframes appSplashLoad {
-  0% { left: -50%; }
-  100% { left: 105%; }
-}
-@media (prefers-color-scheme: dark) {
-  #app-splash { background: #0f172a; }
-  .app-splash-title { color: #e0f2fe; }
-  .app-splash-loader { background: rgba(56,189,248,.18); }
-  .app-splash-loader::after { background: #38bdf8; }
-}
-'''
+          css = base64.b64decode('LyogPT09PT0gQXBwIOWVn+WLleeVq+mdou+8muWPquWcqOi8ieWFpeacn+mWk+mhr+ekuu+8jOS4jeaUueato+W8j+S7i+mdoiA9PT09PSAqLwojYXBwLXNwbGFzaCB7CiAgcG9zaXRpb246IGZpeGVkOwogIGluc2V0OiAwOwogIHotaW5kZXg6IDIxNDc0ODM2NDc7CiAgZGlzcGxheTogZmxleDsKICBhbGlnbi1pdGVtczogY2VudGVyOwogIGp1c3RpZnktY29udGVudDogY2VudGVyOwogIGJhY2tncm91bmQ6ICNmMGY5ZmY7CiAgb3BhY2l0eTogMTsKICB2aXNpYmlsaXR5OiB2aXNpYmxlOwogIHRyYW5zaXRpb246IG9wYWNpdHkgLjIycyBlYXNlLCB2aXNpYmlsaXR5IC4yMnMgZWFzZTsKfQojYXBwLXNwbGFzaC5zcGxhc2gtaGlkZSB7CiAgb3BhY2l0eTogMDsKICB2aXNpYmlsaXR5OiBoaWRkZW47CiAgcG9pbnRlci1ldmVudHM6IG5vbmU7Cn0KLmFwcC1zcGxhc2gtaW5uZXIgewogIGRpc3BsYXk6IGZsZXg7CiAgZmxleC1kaXJlY3Rpb246IGNvbHVtbjsKICBhbGlnbi1pdGVtczogY2VudGVyOwogIGp1c3RpZnktY29udGVudDogY2VudGVyOwogIGdhcDogMTJweDsKfQouYXBwLXNwbGFzaC1sb2dvIHsKICB3aWR0aDogOTZweDsKICBoZWlnaHQ6IDk2cHg7CiAgYm9yZGVyLXJhZGl1czogMjJweDsKICBvYmplY3QtZml0OiBjb3ZlcjsKICBib3gtc2hhZG93OiAwIDEwcHggMjhweCByZ2JhKDE0LDE2NSwyMzMsLjE2KTsKICBhbmltYXRpb246IGFwcFNwbGFzaFB1bHNlIDEuMjVzIGVhc2UtaW4tb3V0IGluZmluaXRlOwp9Ci5hcHAtc3BsYXNoLXRpdGxlIHsKICBmb250LXNpemU6IDE3cHg7CiAgbGluZS1oZWlnaHQ6IDE7CiAgZm9udC13ZWlnaHQ6IDgwMDsKICBsZXR0ZXItc3BhY2luZzogLjAyZW07CiAgY29sb3I6ICMwZjE3MmE7Cn0KLmFwcC1zcGxhc2gtbG9hZGVyIHsKICB3aWR0aDogMjhweDsKICBoZWlnaHQ6IDNweDsKICBvdmVyZmxvdzogaGlkZGVuOwogIGJvcmRlci1yYWRpdXM6IDk5OXB4OwogIGJhY2tncm91bmQ6IHJnYmEoMTQsMTY1LDIzMywuMTUpOwogIHBvc2l0aW9uOiByZWxhdGl2ZTsKfQouYXBwLXNwbGFzaC1sb2FkZXI6OmFmdGVyIHsKICBjb250ZW50OiAnJzsKICBwb3NpdGlvbjogYWJzb2x1dGU7CiAgdG9wOiAwOwogIGJvdHRvbTogMDsKICB3aWR0aDogNDUlOwogIGJvcmRlci1yYWRpdXM6IGluaGVyaXQ7CiAgYmFja2dyb3VuZDogIzBlYTVlOTsKICBhbmltYXRpb246IGFwcFNwbGFzaExvYWQgMXMgZWFzZS1pbi1vdXQgaW5maW5pdGU7Cn0KQGtleWZyYW1lcyBhcHBTcGxhc2hQdWxzZSB7CiAgMCUsMTAwJSB7IHRyYW5zZm9ybTogc2NhbGUoMSk7IH0KICA1MCUgeyB0cmFuc2Zvcm06IHNjYWxlKDEuMDM1KTsgfQp9CkBrZXlmcmFtZXMgYXBwU3BsYXNoTG9hZCB7CiAgMCUgeyBsZWZ0OiAtNTAlOyB9CiAgMTAwJSB7IGxlZnQ6IDEwNSU7IH0KfQpAbWVkaWEgKHByZWZlcnMtY29sb3Itc2NoZW1lOiBkYXJrKSB7CiAgI2FwcC1zcGxhc2ggeyBiYWNrZ3JvdW5kOiAjMGYxNzJhOyB9CiAgLmFwcC1zcGxhc2gtdGl0bGUgeyBjb2xvcjogI2UwZjJmZTsgfQogIC5hcHAtc3BsYXNoLWxvYWRlciB7IGJhY2tncm91bmQ6IHJnYmEoNTYsMTg5LDI0OCwuMTgpOyB9CiAgLmFwcC1zcGxhc2gtbG9hZGVyOjphZnRlciB7IGJhY2tncm91bmQ6ICMzOGJkZjg7IH0KfQo=').decode()
+          splash = base64.b64decode('PGRpdiBpZD0iYXBwLXNwbGFzaCIgYXJpYS1oaWRkZW49InRydWUiPgogIDxkaXYgY2xhc3M9ImFwcC1zcGxhc2gtaW5uZXIiPgogICAgPGltZyBjbGFzcz0iYXBwLXNwbGFzaC1sb2dvIiBzcmM9Ii4vSU1HXzQyODkucG5nIiBhbHQ9IiI+CiAgICA8ZGl2IGNsYXNzPSJhcHAtc3BsYXNoLXRpdGxlIj7nlKLlk4HoqIjnrpflmag8L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImFwcC1zcGxhc2gtbG9hZGVyIj48L2Rpdj4KICA8L2Rpdj4KPC9kaXY+CjxzY3JpcHQ+CihmdW5jdGlvbiAoKSB7CiAgZnVuY3Rpb24gaGlkZUFwcFNwbGFzaCgpIHsKICAgIHZhciBzcGxhc2ggPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnYXBwLXNwbGFzaCcpOwogICAgaWYgKCFzcGxhc2ggfHwgc3BsYXNoLmNsYXNzTGlzdC5jb250YWlucygnc3BsYXNoLWhpZGUnKSkgcmV0dXJuOwogICAgc3BsYXNoLmNsYXNzTGlzdC5hZGQoJ3NwbGFzaC1oaWRlJyk7CiAgICBzZXRUaW1lb3V0KGZ1bmN0aW9uICgpIHsgaWYgKHNwbGFzaCAmJiBzcGxhc2gucGFyZW50Tm9kZSkgc3BsYXNoLnBhcmVudE5vZGUucmVtb3ZlQ2hpbGQoc3BsYXNoKTsgfSwgMjgwKTsKICB9CiAgd2luZG93LmFkZEV2ZW50TGlzdGVuZXIoJ2xvYWQnLCBmdW5jdGlvbiAoKSB7IHNldFRpbWVvdXQoaGlkZUFwcFNwbGFzaCwgMTIwKTsgfSwgeyBvbmNlOiB0cnVlIH0pOwogIHNldFRpbWVvdXQoaGlkZUFwcFNwbGFzaCwgNDUwMCk7Cn0pKCk7Cjwvc2NyaXB0Pgo=').decode()
           if '#app-splash {' not in s:
-              if css_marker not in s:
-                  raise SystemExit('style marker not found')
-              s = s.replace(css_marker, css + '\n' + css_marker, 1)
-
-          body_marker = '<body>\n'
-          splash = r'''<div id="app-splash" aria-hidden="true">
-  <div class="app-splash-inner">
-    <img class="app-splash-logo" src="./IMG_4289.png" alt="">
-    <div class="app-splash-title">產品計算器</div>
-    <div class="app-splash-loader"></div>
-  </div>
-</div>
-<script>
-(function () {
-  function hideAppSplash() {
-    var splash = document.getElementById('app-splash');
-    if (!splash || splash.classList.contains('splash-hide')) return;
-    splash.classList.add('splash-hide');
-    setTimeout(function () { if (splash && splash.parentNode) splash.parentNode.removeChild(splash); }, 280);
-  }
-  window.addEventListener('load', function () { setTimeout(hideAppSplash, 120); }, { once: true });
-  setTimeout(hideAppSplash, 4500);
-})();
-</script>
-'''
+              s = s.replace('</style>\n</head>', css + '\n</style>\n</head>', 1)
           if 'id="app-splash"' not in s:
-              if body_marker not in s:
-                  raise SystemExit('body marker not found')
-              s = s.replace(body_marker, body_marker + splash, 1)
-
+              s = s.replace('<body>\n', '<body>\n' + splash, 1)
           p.write_text(s, encoding='utf-8')
-      - name: Remove temporary workflow and commit patch
+          PY
+      - name: Commit patch and remove helper workflow
+        shell: bash
         run: |
           rm -f .github/workflows/apply-splash-v1.yml
           git config user.name "kwan0907"
