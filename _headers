@@ -1,13 +1,10 @@
 /manifest.json
   Content-Type: application/manifest+json; charset=utf-8
+/*.png
+ /IMG_4289.png
+  Cache-Control: public, max-age=31536000, immutable
 
 /sw.js
   Content-Type: application/javascript; charset=utf-8
   Cache-Control: no-cache, no-store, must-revalidate
   Service-Worker-Allowed: /
-
-/offline.html
-  Cache-Control: no-cache
-
-/IMG_4289.png
-  Cache-Control: public, max-age=31536000, immutable

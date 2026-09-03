@@ -1327,9 +1327,8 @@ function clearSelection() { triggerHaptic('success'); selectedProducts = []; upd
 let deferredInstallPrompt = null;
 function initPWA() {
   if ('serviceWorker' in navigator) {
-    const swCode = 'self.addEventListener("install",function(){self.skipWaiting();});self.addEventListener("activate",function(){self.clients.claim();});self.addEventListener("fetch",function(e){e.respondWith(caches.match(e.request).then(function(r){return r||fetch(e.request).catch(function(){return new Response("",{status:503});});}));});';
     try {
-      navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'application/javascript' })))
+      navigator.serviceWorker.register('./sw.js', { scope: './' })
         .then(() => console.log('✅ PWA ServiceWorker 已啟用')).catch(() => {});
     } catch (e) {}
   }
