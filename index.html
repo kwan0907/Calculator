@@ -22,6 +22,7 @@
 
 <style>
 /* ===== 阻擋手機端下拉刷新 ===== */
+html { background: #f0f9ff; }
 html, body {
   overscroll-behavior-y: none;
 }
@@ -464,13 +465,19 @@ tr.package-row td:not(.product-name) { color: var(--color-pkg); font-weight: 700
 </div>
 <script>
 (function () {
+  var splashShownAt = performance.now();
+  var minimumSplashMs = 800;
   function hideAppSplash() {
     var splash = document.getElementById('app-splash');
     if (!splash || splash.classList.contains('splash-hide')) return;
     splash.classList.add('splash-hide');
     setTimeout(function () { if (splash && splash.parentNode) splash.parentNode.removeChild(splash); }, 280);
   }
-  window.addEventListener('load', function () { setTimeout(hideAppSplash, 120); }, { once: true });
+  function hideWhenReady() {
+    var elapsed = performance.now() - splashShownAt;
+    setTimeout(hideAppSplash, Math.max(0, minimumSplashMs - elapsed));
+  }
+  window.addEventListener('load', hideWhenReady, { once: true });
   setTimeout(hideAppSplash, 4500);
 })();
 </script>
