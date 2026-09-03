@@ -210,27 +210,27 @@ select {
 
 .btn-clear { background: var(--clear-bg); color: var(--clear-text); border: 1px solid var(--clear-border); font-weight: 800; }
 .btn-clear:hover { background: var(--clear-hover-bg) !important; color: var(--clear-hover-text) !important; }
-.btn-primary { background: var(--primary-color); color: white; border: none; }
+.btn-primary { background: #0369a1; color: white; border: none; }
 .btn-primary:hover { background: var(--primary-hover) !important; color: white !important; }
 .btn-danger { background: var(--danger-bg); color: white; border: none; }
 .btn-danger:hover { background: var(--danger-hover) !important; color: white !important; }
-.btn-copy { background: var(--copy-bg); color: white; border: none; }
+.btn-copy { background: #0369a1; color: white; border: none; }
 .btn-copy:hover { background: var(--copy-hover) !important; color: white !important; }
 
 .btn-add-product {
   width: 100%; padding: 10px; font-size: 0.95rem; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 6px; border: none;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-  color: white; font-weight: 800; box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+  background: linear-gradient(135deg, #0284c7, #075985);
+  color: white; font-weight: 800; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.22);
 }
 .btn-add-product:hover { background: linear-gradient(135deg, var(--primary-hover), #0369a1) !important; color: white !important; }
 
 .package-plans-section { margin-bottom: 8px; padding: 8px 10px; border-radius: 10px; background: var(--color-pkg-bg); border: 1px solid var(--color-pkg-border); }
 .package-plans-title { font-size: 0.85rem; font-weight: 800; color: var(--color-pkg); margin-bottom: 6px; }
 .package-plans-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.package-plan-btn { padding: 6px 8px; background: rgba(139, 92, 246, 0.95); color: white; border: 1px solid rgba(255,255,255,0.25); border-radius: 8px; text-align: left; display: flex; flex-direction: column; gap: 2px; font-weight: 600; }
-.package-plan-btn:hover { background: rgba(109, 40, 217, 1) !important; color: white !important; }
-.package-plan-btn:active { background: rgba(91, 33, 182, 1) !important; color: white !important; transform: scale(0.98); }
+.package-plan-btn { padding: 6px 8px; background: rgba(109, 40, 217, 0.94); color: white; border: 1px solid rgba(255,255,255,0.25); border-radius: 8px; text-align: left; display: flex; flex-direction: column; gap: 2px; font-weight: 600; }
+.package-plan-btn:hover { background: rgba(91, 33, 182, 1) !important; color: white !important; }
+.package-plan-btn:active { background: rgba(76, 29, 149, 1) !important; color: white !important; transform: scale(0.98); }
 
 .plan-row1 { display: flex; justify-content: space-between; align-items: baseline; }
 .plan-name  { font-size: 0.75rem; font-weight: 800; }
@@ -298,7 +298,7 @@ tr.package-row td:not(.product-name) { color: var(--color-pkg); font-weight: 700
 .cart-summary-bottom-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(14, 165, 233, 0.3); padding-top: 10px; }
 .cart-summary-total { font-weight: 900; font-size: 1.15rem; color: var(--cart-price-color); }
 .btn-copy-cart {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  background: linear-gradient(135deg, #0284c7, #075985);
   color: white; border: none; padding: 10px 16px; border-radius: 12px;
   font-weight: 800; font-size: 0.95rem; box-shadow: 0 4px 12px rgba(14,165,233,0.3);
   cursor: pointer; margin: 0;
@@ -558,7 +558,7 @@ tr.package-row td:not(.product-name) { color: var(--color-pkg); font-weight: 700
 </div>
 
 <div class="shortcut-section" style="margin-bottom: 10px;">
-  <button class="btn-add-product" style="background: linear-gradient(135deg, rgba(16,185,129,0.95), rgba(5,150,105,0.95)); box-shadow: 0 4px 10px rgba(16,185,129,0.3); font-size: 0.9rem;" onclick="addBigMealCombo()">
+  <button class="btn-add-product" style="background: linear-gradient(135deg, rgba(5,150,105,0.96), rgba(4,120,87,0.98)); box-shadow: 0 4px 10px rgba(5,150,105,0.2); font-size: 0.9rem;" onclick="addBigMealCombo()">
     🍽️ 快捷添加：大餐四寶 (美纖、甲殼、消脂、抗脂)
   </button>
 </div>
