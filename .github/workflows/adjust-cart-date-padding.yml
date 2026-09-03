@@ -1,0 +1,27 @@
+name: Adjust cart date padding
+
+on:
+  push:
+    paths:
+      - '.github/workflows/adjust-cart-date-padding.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: weak-network-cart-date
+      - name: Adjust scroll clearance
+        run: python3 -c "from pathlib import Path; p=Path('index.html'); s=p.read_text(); s=s.replace('.cart-scroll-area { padding-bottom: 110px; }', '.cart-scroll-area { padding-bottom: 138px; }', 1); p.write_text(s)"
+      - name: Commit
+        run: |
+          rm -f .github/workflows/adjust-cart-date-padding.yml
+          git config user.name "kwan0907"
+          git config user.email "63507197+kwan0907@users.noreply.github.com"
+          git add index.html .github/workflows/adjust-cart-date-padding.yml
+          git commit -m "Keep cart items clear of dated summary"
+          git push origin HEAD:weak-network-cart-date
