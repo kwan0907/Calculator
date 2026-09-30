@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calculator-static-v3-20260903';
+const CACHE_NAME = 'calculator-static-v3-20260930-1';
 const APP_SHELL = ['./', './index.html', './manifest.json', './IMG_4289.png'];
 
 self.addEventListener('install', (event) => {
@@ -21,27 +21,23 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-async function navigationResponse(request, event) {
+async function navigationResponse(request) {
   const cache = await caches.open(CACHE_NAME);
-  const cached = (await cache.match(request)) || (await cache.match('./index.html')) || (await cache.match('./'));
 
-  const refresh = fetch(request).then(async (response) => {
+  // 導航頁面採用 network-first：在線時優先載入最新版本，
+  // 只有網絡失敗時才回退到快取，避免更新後仍先看到舊版 index.html。
+  try {
+    const response = await fetch(request, { cache: 'no-store' });
     if (response && response.ok) {
       await cache.put(request, response.clone()).catch(() => {});
       await cache.put('./index.html', response.clone()).catch(() => {});
     }
     return response;
-  }).catch(() => null);
-
-  if (cached) {
-    // 有快取就立即開 App，不再因弱網絡等待；同時背景更新下一次啟動用的版本。
-    if (event) event.waitUntil(refresh);
-    return cached;
+  } catch (e) {
+    const cached = (await cache.match(request)) || (await cache.match('./index.html')) || (await cache.match('./'));
+    if (cached) return cached;
+    throw new Error('offline and no cached app shell');
   }
-
-  const response = await refresh;
-  if (response) return response;
-  throw new Error('offline and no cached app shell');
 }
 
 async function staticResponse(request) {
