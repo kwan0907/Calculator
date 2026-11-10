@@ -154,6 +154,13 @@ body {
 }
 
 h1 { color: var(--text-heading); text-align: center; margin-bottom: 6px; font-size: 1.25rem; font-weight: 800; margin-top: 4px; }
+.app-topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.app-topbar h1 { margin: 0; text-align: left; }
+.memory-toggle { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-weight: 800; color: var(--primary-color); cursor: pointer; }
+#memory-mode-toggle { width: 18px; height: 18px; margin: 0; accent-color: var(--primary-color); cursor: pointer; flex: none; }
+.memory-tools { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 5px 10px; margin-bottom: 8px; font-size: 0.75rem; color: var(--text-muted); }
+.memory-tools button { font-size: 0.75rem; padding: 4px 8px; color: var(--clear-text); border-color: var(--clear-border); }
+.memory-tools button:disabled { opacity: 0.45; cursor: default; }
 input, select { font-size: 15px !important; color: var(--text-main); font-weight: 600; padding: 6px 8px; border-radius: 8px; }
 select option { background: var(--glass-bg-solid); color: var(--text-main); font-weight: 600;}
 
@@ -556,7 +563,14 @@ tr.package-row td:not(.product-name) { color: var(--color-pkg); font-weight: 700
 })();
 </script>
 <div class="container">
-<h1>產品計算器</h1>
+<div class="app-topbar">
+  <h1>產品計算器</h1>
+  <label class="memory-toggle" for="memory-mode-toggle">記憶模式 <input type="checkbox" id="memory-mode-toggle" onchange="toggleMemoryMode(this.checked)"></label>
+</div>
+<div class="memory-tools">
+  <span id="memory-status" aria-live="polite">只儲存在此瀏覽器；共用瀏覽器的人也可看到。</span>
+  <button id="clear-memory-btn" onclick="confirmClearSavedData()" disabled>清除已儲存資料</button>
+</div>
 
 <div id="pwa-install-wrap" class="pwa-install-wrap" style="display:none; text-align:center;">
   <button class="pwa-install-btn" onclick="handlePwaInstall()">📲 安裝到主畫面</button>
@@ -814,6 +828,151 @@ let selectedProducts = [];
 let currentCategory = "all";
 let currentView = "table";
 let newlyAddedStockNos = new Set();
+
+const MEMORY_MODE_KEY = 'calculator:memory:enabled:v1';
+const MEMORY_STATE_KEY = 'calculator:memory:state:v1';
+let memoryEnabled = false;
+let memoryInitialising = false;
+
+function getMemoryState() {
+  return {
+    version: 1,
+    products: selectedProducts
+      .filter(p => Number.isSafeInteger(p.quantity) && p.quantity > 0)
+      .map(p => ({ stockNo: p.stock_no, quantity: p.quantity })),
+    tier1: document.getElementById('pricing-tier1').value,
+    tier2: document.getElementById('pricing-tier2').value,
+    view: currentView
+  };
+}
+
+function readSavedMemoryState() {
+  try {
+    const raw = localStorage.getItem(MEMORY_STATE_KEY);
+    if (!raw) return null;
+    const saved = JSON.parse(raw);
+    if (saved.version !== 1 || !Array.isArray(saved.products)) return null;
+    const seen = new Set();
+    const products = saved.products.filter(item => {
+      if (!item || typeof item.stockNo !== 'string' ||
+          !Number.isSafeInteger(item.quantity) || item.quantity < 1 ||
+          seen.has(item.stockNo) || !productsData.some(p => p.stock_no === item.stockNo)) return false;
+      seen.add(item.stockNo);
+      return true;
+    });
+    const tier1 = document.getElementById('pricing-tier1');
+    const tier2 = document.getElementById('pricing-tier2');
+    return {
+      version: 1,
+      products,
+      tier1: [...tier1.options].some(option => option.value === saved.tier1) ? saved.tier1 : tier1.value,
+      tier2: [...tier2.options].some(option => option.value === saved.tier2) ? saved.tier2 : tier2.value,
+      view: ['table', 'card', 'cart'].includes(saved.view) ? saved.view : 'table'
+    };
+  } catch (e) { return null; }
+}
+
+function applyMemoryState(state) {
+  selectedProducts = state.products.map(item => ({
+    ...productsData.find(p => p.stock_no === item.stockNo), quantity: item.quantity
+  }));
+  document.getElementById('pricing-tier1').value = state.tier1;
+  document.getElementById('pricing-tier2').value = state.tier2;
+  currentView = state.view;
+}
+
+function updateMemoryControls() {
+  document.getElementById('memory-mode-toggle').checked = memoryEnabled;
+  const status = document.getElementById('memory-status');
+  let hasSaved = false;
+  try {
+    hasSaved = localStorage.getItem(MEMORY_STATE_KEY) !== null;
+  } catch (e) {}
+  document.getElementById('clear-memory-btn').disabled = !hasSaved;
+  status.textContent = memoryEnabled
+    ? '已開啟：只儲存在此瀏覽器；共用此瀏覽器的人亦可看到。'
+    : hasSaved ? '已關閉：停止儲存，舊資料仍保留在此瀏覽器。' : '已關閉：不會儲存計算資料。';
+}
+
+function initMemoryMode() {
+  try { memoryEnabled = localStorage.getItem(MEMORY_MODE_KEY) === '1'; }
+  catch (e) { memoryEnabled = false; }
+  if (memoryEnabled) {
+    const saved = readSavedMemoryState();
+    if (saved) applyMemoryState(saved);
+  }
+  updateMemoryControls();
+}
+
+function saveMemoryState() {
+  if (!memoryEnabled || memoryInitialising) return;
+  try {
+    localStorage.setItem(MEMORY_STATE_KEY, JSON.stringify(getMemoryState()));
+    updateMemoryControls();
+  } catch (e) {
+    memoryEnabled = false;
+    try { localStorage.removeItem(MEMORY_MODE_KEY); } catch (ignored) {}
+    updateMemoryControls();
+    showToast('無法儲存資料，記憶模式已關閉');
+  }
+}
+
+function enableMemoryMode(saved) {
+  try {
+    localStorage.setItem(MEMORY_MODE_KEY, '1');
+  } catch (e) {
+    updateMemoryControls();
+    showToast('此瀏覽器無法使用本機儲存空間');
+    return;
+  }
+  memoryEnabled = true;
+  if (saved) {
+    applyMemoryState(saved);
+    switchView(currentView);
+    showToast('已還原上次儲存的計算資料');
+  } else {
+    saveMemoryState();
+    if (memoryEnabled) showToast('記憶模式已開啟');
+  }
+  updateMemoryControls();
+}
+
+function toggleMemoryMode(enabled) {
+  triggerHaptic('light');
+  if (!enabled) {
+    try { localStorage.removeItem(MEMORY_MODE_KEY); }
+    catch (e) {
+      updateMemoryControls();
+      showToast('無法關閉記憶模式，請稍後再試');
+      return;
+    }
+    memoryEnabled = false;
+    updateMemoryControls();
+    showToast('記憶模式已關閉，已儲存資料仍保留');
+    return;
+  }
+  const saved = readSavedMemoryState();
+  if (saved && JSON.stringify(saved) !== JSON.stringify(getMemoryState()) &&
+      (selectedProducts.length > 0 ||
+       document.getElementById('pricing-tier1').value !== '標準價' ||
+       document.getElementById('pricing-tier2').value !== '')) {
+    updateMemoryControls();
+    showConfirmDialog('開啟後會用上次儲存的資料取代目前輸入，確定繼續嗎？', () => enableMemoryMode(saved));
+    return;
+  }
+  enableMemoryMode(saved);
+}
+
+function confirmClearSavedData() {
+  triggerHaptic('light');
+  showConfirmDialog('確定清除已儲存在此瀏覽器的計算資料？目前畫面不會清空；記憶模式開啟時，之後的改動會再次儲存。', () => {
+    try {
+      localStorage.removeItem(MEMORY_STATE_KEY);
+      updateMemoryControls();
+      showToast('已清除儲存資料');
+    } catch (e) { showToast('無法清除儲存資料'); }
+  });
+}
 
 function triggerHaptic(type = 'light') {
   if (!navigator.vibrate) return;
@@ -1233,6 +1392,7 @@ function updateProductDisplay() {
   else if (currentView === 'card') updateProductCards();
   else if (currentView === 'cart') updateCartView(); 
   updateSummary(); 
+  saveMemoryState();
 }
 
 function updateTableHeader() {
@@ -1565,8 +1725,10 @@ window.onload = function () {
   initPWA();
   initFontSize();
   initCategories();
-  switchView('table');
-  updateProductDisplay();
+  memoryInitialising = true;
+  initMemoryMode();
+  switchView(currentView);
+  memoryInitialising = false;
   checkNewProductNotification();
   
   document.addEventListener('touchend', function (e) {

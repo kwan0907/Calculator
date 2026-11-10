@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calculator-static-v3-20260930-1';
+const CACHE_NAME = 'calculator-static-v3-20261111-1';
 const APP_SHELL = ['./', './index.html', './manifest.json', './IMG_4289.png'];
 
 self.addEventListener('install', (event) => {
